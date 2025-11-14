@@ -1,0 +1,156 @@
+<!-- Second Brain Icon - Brain Design -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 140"
+    width="140" height="140"
+    role="img"
+    aria-label="Second Brain icon" style="display:block; margin:auto">
+    <defs>
+        <!-- Gradients -->
+        <linearGradient id="brain-main" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#667eea" />
+            <stop offset="100%" stop-color="#764ba2" />
+        </linearGradient>
+        <linearGradient id="brain-light" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#f093fb" />
+            <stop offset="100%" stop-color="#f5576c" />
+        </linearGradient>
+        <linearGradient id="circuit" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#4facfe" />
+            <stop offset="100%" stop-color="#00f2fe" />
+        </linearGradient>
+        
+        <!-- Glow effects -->
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+            </feMerge>
+        </filter>
+        
+        <filter id="strongGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="5" result="blur2" />
+            <feMerge>
+                <feMergeNode in="blur2" />
+                <feMergeNode in="SourceGraphic" />
+            </feMerge>
+        </filter>
+    </defs>
+    
+    <!-- Background circle -->
+    <circle cx="70" cy="70" r="65" fill="url(#brain-main)" opacity="0.15" />
+    
+    <!-- Brain shape -->
+    <g transform="translate(70,70)" filter="url(#glow)">
+        <!-- Left hemisphere -->
+        <path d="M -25,-30 Q -35,-25 -35,-15 Q -35,-5 -30,5 Q -25,15 -20,20 Q -15,25 -10,25 Q -5,25 -5,20 L -5,-25 Q -10,-30 -15,-30 Q -20,-30 -25,-30 Z" 
+              fill="url(#brain-main)" opacity="0.9" />
+        
+        <!-- Right hemisphere -->
+        <path d="M 25,-30 Q 35,-25 35,-15 Q 35,-5 30,5 Q 25,15 20,20 Q 15,25 10,25 Q 5,25 5,20 L 5,-25 Q 10,-30 15,-30 Q 20,-30 25,-30 Z" 
+              fill="url(#brain-light)" opacity="0.9" />
+        
+        <!-- Center connection (corpus callosum) -->
+        <rect x="-5" y="-25" width="10" height="45" rx="2" fill="#FFFFFF" opacity="0.3" />
+        
+        <!-- Neural pathways (circuit-like lines) -->
+        <g stroke="url(#circuit)" stroke-width="2" fill="none" opacity="0.7">
+            <!-- Left side circuits -->
+            <path d="M -25,-20 Q -30,-15 -30,-10">
+                <animate attributeName="stroke-opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite" />
+            </path>
+            <path d="M -25,-10 Q -28,-5 -28,0">
+                <animate attributeName="stroke-opacity" values="0.3;1;0.3" dur="2.5s" begin="0.5s" repeatCount="indefinite" />
+            </path>
+            <path d="M -20,10 Q -25,12 -25,15">
+                <animate attributeName="stroke-opacity" values="0.3;1;0.3" dur="2.2s" begin="0.8s" repeatCount="indefinite" />
+            </path>
+            
+            <!-- Right side circuits -->
+            <path d="M 25,-20 Q 30,-15 30,-10">
+                <animate attributeName="stroke-opacity" values="0.3;1;0.3" dur="2.3s" begin="0.3s" repeatCount="indefinite" />
+            </path>
+            <path d="M 25,-10 Q 28,-5 28,0">
+                <animate attributeName="stroke-opacity" values="0.3;1;0.3" dur="2.7s" begin="0.7s" repeatCount="indefinite" />
+            </path>
+            <path d="M 20,10 Q 25,12 25,15">
+                <animate attributeName="stroke-opacity" values="0.3;1;0.3" dur="2.4s" begin="1s" repeatCount="indefinite" />
+            </path>
+            
+            <!-- Cross connections -->
+            <path d="M -15,-5 Q 0,-8 15,-5">
+                <animate attributeName="stroke-opacity" values="0.3;1;0.3" dur="2.6s" begin="0.4s" repeatCount="indefinite" />
+            </path>
+            <path d="M -15,5 Q 0,8 15,5">
+                <animate attributeName="stroke-opacity" values="0.3;1;0.3" dur="2.8s" begin="0.6s" repeatCount="indefinite" />
+            </path>
+        </g>
+        
+        <!-- Neural nodes (synapses) -->
+        <g filter="url(#strongGlow)">
+            <!-- Left hemisphere nodes -->
+            <circle cx="-25" cy="-20" r="3" fill="#4facfe">
+                <animate attributeName="r" values="3;4.5;3" dur="2s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="-25" cy="-10" r="3" fill="#4facfe">
+                <animate attributeName="r" values="3;4.5;3" dur="2.5s" begin="0.5s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="-20" cy="10" r="3" fill="#4facfe">
+                <animate attributeName="r" values="3;4.5;3" dur="2.2s" begin="0.8s" repeatCount="indefinite" />
+            </circle>
+            
+            <!-- Right hemisphere nodes -->
+            <circle cx="25" cy="-20" r="3" fill="#00f2fe">
+                <animate attributeName="r" values="3;4.5;3" dur="2.3s" begin="0.3s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="25" cy="-10" r="3" fill="#00f2fe">
+                <animate attributeName="r" values="3;4.5;3" dur="2.7s" begin="0.7s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="20" cy="10" r="3" fill="#00f2fe">
+                <animate attributeName="r" values="3;4.5;3" dur="2.4s" begin="1s" repeatCount="indefinite" />
+            </circle>
+            
+            <!-- Center nodes -->
+            <circle cx="-15" cy="-5" r="2.5" fill="#f5576c">
+                <animate attributeName="r" values="2.5;4;2.5" dur="2.6s" begin="0.4s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="15" cy="-5" r="2.5" fill="#f5576c">
+                <animate attributeName="r" values="2.5;4;2.5" dur="2.6s" begin="0.4s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="-15" cy="5" r="2.5" fill="#f093fb">
+                <animate attributeName="r" values="2.5;4;2.5" dur="2.8s" begin="0.6s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="15" cy="5" r="2.5" fill="#f093fb">
+                <animate attributeName="r" values="2.5;4;2.5" dur="2.8s" begin="0.6s" repeatCount="indefinite" />
+            </circle>
+        </g>
+        
+        <!-- AI spark in center -->
+        <g opacity="0.8" filter="url(#strongGlow)">
+            <circle cx="0" cy="0" r="5" fill="#FFFFFF" opacity="0.6">
+                <animate attributeName="r" values="5;7;5" dur="1.5s" repeatCount="indefinite" />
+                <animate attributeName="opacity" values="0.4;0.9;0.4" dur="1.5s" repeatCount="indefinite" />
+            </circle>
+            <!-- Sparkle rays -->
+            <g stroke="#FFFFFF" stroke-width="2" stroke-linecap="round">
+                <line x1="0" y1="-8" x2="0" y2="-12" opacity="0.7">
+                    <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite" />
+                </line>
+                <line x1="0" y1="8" x2="0" y2="12" opacity="0.7">
+                    <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" begin="0.25s" repeatCount="indefinite" />
+                </line>
+                <line x1="-8" y1="0" x2="-12" y2="0" opacity="0.7">
+                    <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" begin="0.5s" repeatCount="indefinite" />
+                </line>
+                <line x1="8" y1="0" x2="12" y2="0" opacity="0.7">
+                    <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" begin="0.75s" repeatCount="indefinite" />
+                </line>
+            </g>
+        </g>
+    </g>
+    
+    <!-- Outer glow ring -->
+    <circle cx="70" cy="70" r="60" fill="none" stroke="url(#circuit)" stroke-width="2" opacity="0.3">
+        <animate attributeName="r" values="60;62;60" dur="3s" repeatCount="indefinite" />
+        <animate attributeName="opacity" values="0.2;0.5;0.2" dur="3s" repeatCount="indefinite" />
+    </circle>
+</svg>

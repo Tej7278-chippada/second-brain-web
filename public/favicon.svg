@@ -1,0 +1,129 @@
+<!-- Second Brain Icon Only -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 140"
+    width="140" height="140"
+    role="img"
+    aria-label="Second Brain icon" style="display:block; margin:auto">
+    <defs>
+        <!-- Gradients for neural nodes -->
+        <linearGradient id="g-purple" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#9C27B0" />
+            <stop offset="100%" stop-color="#7B1FA2" />
+        </linearGradient>
+        <linearGradient id="g-cyan" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#00BCD4" />
+            <stop offset="100%" stop-color="#0097A7" />
+        </linearGradient>
+        <linearGradient id="g-indigo" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#3F51B5" />
+            <stop offset="100%" stop-color="#303F9F" />
+        </linearGradient>
+        <linearGradient id="g-teal" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#009688" />
+            <stop offset="100%" stop-color="#00796B" />
+        </linearGradient>
+        <linearGradient id="g-deepPurple" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#673AB7" />
+            <stop offset="100%" stop-color="#512DA8" />
+        </linearGradient>
+        
+        <!-- Soft glow for neural nodes -->
+        <!-- <filter id="neuralGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+            </feMerge>
+        </filter> -->
+    </defs>
+    
+    <!-- Neural network icon centered -->
+    <g transform="translate(20,20)">
+        <!-- Connection lines forming a brain-like network -->
+        <g opacity="0.6" stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round">
+            <!-- Central connections -->
+            <path d="M 50 35 Q 65 40 75 25" opacity="0.7">
+                <!-- <animate attributeName="opacity" values="0.4;0.9;0.4" dur="2.5s" repeatCount="indefinite" /> -->
+            </path>
+            <path d="M 50 35 Q 35 55 20 70" opacity="0.6">
+                <!-- <animate attributeName="opacity" values="0.5;0.8;0.5" dur="3s" begin="0.5s" repeatCount="indefinite" /> -->
+            </path>
+            <path d="M 50 35 Q 65 55 75 75" opacity="0.7">
+                <!-- <animate attributeName="opacity" values="0.4;0.85;0.4" dur="2.8s" begin="1s" repeatCount="indefinite" /> -->
+            </path>
+            <path d="M 75 25 Q 85 45 85 65" opacity="0.5">
+                <!-- <animate attributeName="opacity" values="0.3;0.75;0.3" dur="3.2s" begin="0.3s" repeatCount="indefinite" /> -->
+            </path>
+            <path d="M 20 70 Q 40 75 60 85" opacity="0.6">
+                <!-- <animate attributeName="opacity" values="0.4;0.8;0.4" dur="2.7s" begin="0.8s" repeatCount="indefinite" /> -->
+            </path>
+            <path d="M 75 75 Q 70 80 60 85" opacity="0.5">
+                <!-- <animate attributeName="opacity" values="0.3;0.7;0.3" dur="3s" begin="1.2s" repeatCount="indefinite" /> -->
+            </path>
+            <path d="M 20 15 Q 35 25 50 35" opacity="0.6">
+                <!-- <animate attributeName="opacity" values="0.4;0.85;0.4" dur="2.6s" begin="0.4s" repeatCount="indefinite" /> -->
+            </path>
+            <path d="M 85 65 Q 80 70 75 75" opacity="0.5">
+                <!-- <animate attributeName="opacity" values="0.35;0.75;0.35" dur="3.1s" begin="0.7s" repeatCount="indefinite" /> -->
+            </path>
+        </g>
+        
+        <!-- Neural nodes (knowledge points) -->
+        <!-- Center node (main brain hub) -->
+        <g filter="url(#neuralGlow)">
+            <circle cx="50" cy="35" r="24" fill="url(#g-purple)" opacity="0.95">
+                <!-- <animate attributeName="r" values="20;22;20" dur="2s" repeatCount="indefinite" /> -->
+            </circle>
+            <circle cx="50" cy="35" r="11" fill="#FFFFFF" opacity="0.3" />
+        </g>
+        
+        <!-- Top left node (documents) -->
+        <g filter="url(#neuralGlow)">
+            <circle cx="5" cy="5" r="20" fill="url(#g-cyan)" opacity="0.9">
+                <!-- <animate attributeName="r" values="16;18;16" dur="2.5s" begin="0.5s" repeatCount="indefinite" /> -->
+            </circle>
+        </g>
+        
+        <!-- Top right node (photos) -->
+        <g filter="url(#neuralGlow)">
+            <circle cx="85" cy="15" r="20" fill="url(#g-indigo)" opacity="0.9">
+                <!-- <animate attributeName="r" values="16;18;16" dur="2.3s" begin="0.8s" repeatCount="indefinite" /> -->
+            </circle>
+        </g>
+        
+        <!-- Bottom left node (reminders) -->
+        <g filter="url(#neuralGlow)">
+            <circle cx="10" cy="80" r="20" fill="url(#g-teal)" opacity="0.9">
+                <!-- <animate attributeName="r" values="16;18;16" dur="2.7s" begin="0.3s" repeatCount="indefinite" /> -->
+            </circle>
+        </g>
+        
+        <!-- Bottom right node (AI processing) -->
+        <g filter="url(#neuralGlow)">
+            <circle cx="85" cy="85" r="20" fill="url(#g-deepPurple)" opacity="0.9">
+                <!-- <animate attributeName="r" values="16;18;16" dur="2.4s" begin="1s" repeatCount="indefinite" /> -->
+            </circle>
+        </g>
+        
+        <!-- Right node (queries) -->
+        <g filter="url(#neuralGlow)">
+            <circle cx="85" cy="65" r="16" fill="url(#g-cyan)" opacity="0.85">
+                <!-- <animate attributeName="r" values="13;15;13" dur="2.6s" begin="0.6s" repeatCount="indefinite" /> -->
+            </circle>
+        </g>
+        
+        <!-- Bottom center node (storage) -->
+        <g filter="url(#neuralGlow)">
+            <circle cx="60" cy="85" r="16" fill="url(#g-indigo)" opacity="0.85">
+                <!-- <animate attributeName="r" values="13;15;13" dur="2.8s" begin="0.4s" repeatCount="indefinite" /> -->
+            </circle>
+        </g>
+        
+        <!-- Subtle AI sparkle effect in center -->
+        <g opacity="0.4">
+            <path d="M 50 25 L 50 20 M 50 50 L 50 45 M 40 35 L 35 35 M 60 35 L 65 35" 
+                  stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round">
+                <!-- <animate attributeName="opacity" values="0.2;0.8;0.2" dur="2s" repeatCount="indefinite" /> -->
+            </path>
+        </g>
+    </g>
+</svg>

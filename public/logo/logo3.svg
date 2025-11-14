@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200" width="300" height="200">
+    <defs>
+        <linearGradient id="brainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#6dd5ed" />
+            <stop offset="100%" stop-color="#2193b0" />
+        </linearGradient>
+        <linearGradient id="circuitGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#753a88" />
+            <stop offset="100%" stop-color="#cc2b5e" />
+        </linearGradient>
+        <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#6dd5ed" />
+            <stop offset="100%" stop-color="#2193b0" />
+        </linearGradient>
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+            </feMerge>
+        </filter>
+    </defs>
+    
+    <!-- Icon -->
+    <g transform="translate(50, 0)">
+        <!-- Brain shape -->
+        <path d="M50,100 C50,70 70,50 100,50 C130,50 150,70 150,100 C150,130 130,150 100,150 C70,150 50,130 50,100 Z" 
+              fill="url(#brainGradient)" filter="url(#glow)" />
+        
+        <!-- Brain hemispheres division -->
+        <path d="M100,50 L100,150" stroke="white" stroke-width="2" stroke-opacity="0.3" />
+        
+        <!-- Brain folds -->
+        <path d="M60,70 C70,65 80,70 85,80" stroke="white" stroke-width="2" stroke-opacity="0.4" fill="none" />
+        <path d="M60,90 C70,85 80,90 85,100" stroke="white" stroke-width="2" stroke-opacity="0.4" fill="none" />
+        <path d="M60,110 C70,105 80,110 85,120" stroke="white" stroke-width="2" stroke-opacity="0.4" fill="none" />
+        <path d="M115,80 C120,70 130,65 140,70" stroke="white" stroke-width="2" stroke-opacity="0.4" fill="none" />
+        <path d="M115,100 C120,90 130,85 140,90" stroke="white" stroke-width="2" stroke-opacity="0.4" fill="none" />
+        <path d="M115,120 C120,110 130,105 140,110" stroke="white" stroke-width="2" stroke-opacity="0.4" fill="none" />
+        
+        <!-- Circuit lines representing AI and connections -->
+        <g stroke="url(#circuitGradient)" stroke-width="2" fill="none">
+            <path d="M30,50 L50,50" />
+            <path d="M30,70 L50,70" />
+            <path d="M30,90 L50,90" />
+            <path d="M30,110 L50,110" />
+            <path d="M30,130 L50,130" />
+            
+            <path d="M150,50 L170,50" />
+            <path d="M150,70 L170,70" />
+            <path d="M150,90 L170,90" />
+            <path d="M150,110 L170,110" />
+            <path d="M150,130 L170,130" />
+            
+            <path d="M70,30 L70,50" />
+            <path d="M90,30 L90,50" />
+            <path d="M110,30 L110,50" />
+            <path d="M130,30 L130,50" />
+            
+            <path d="M70,150 L70,170" />
+            <path d="M90,150 L90,170" />
+            <path d="M110,150 L110,170" />
+            <path d="M130,150 L130,170" />
+        </g>
+        
+        <!-- Central processing node -->
+        <circle cx="100" cy="100" r="15" fill="#753a88" filter="url(#glow)" />
+        <circle cx="100" cy="100" r="8" fill="#cc2b5e" />
+        
+        <!-- Sparkles representing intelligence -->
+        <g fill="#FFD700" opacity="0.7">
+            <circle cx="75" cy="75" r="2" />
+            <circle cx="125" cy="75" r="2" />
+            <circle cx="85" cy="125" r="2" />
+            <circle cx="115" cy="125" r="2" />
+        </g>
+    </g>
+    
+    <!-- Text -->
+    <text x="200" y="80" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="url(#textGradient)">
+        Second Brain
+    </text>
+    <text x="200" y="110" font-family="Arial, sans-serif" font-size="14" fill="#6dd5ed" opacity="0.9">
+        AI-Powered Knowledge Assistant
+    </text>
+</svg>

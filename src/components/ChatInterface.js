@@ -13,17 +13,20 @@ import {
 //   IconButton,
   Divider,
   Chip,
-  CircularProgress
+  CircularProgress,
+  InputAdornment,
+  IconButton
 } from '@mui/material';
 import {
-  Send,
+  // Send,
   SmartToy,
   Person,
   Clear
 } from '@mui/icons-material';
 import { secondBrainAPI } from '../services/api';
+import ArrowUpwardRoundedIcon from '@mui/icons-material/ArrowUpwardRounded';
 
-const ChatInterface = () => {
+const ChatInterface = ({isMobile}) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -95,36 +98,47 @@ const ChatInterface = () => {
   };
 
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', mb: isMobile ? 16 : 12 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h5" gutterBottom>
+        <Typography variant="h6" gutterBottom>
           Chat with Your Second Brain
         </Typography>
-        <Button
+        {messages.length > 0 && (<Button
           startIcon={<Clear />}
           onClick={clearChat}
           variant="outlined"
           size="small"
         >
           Clear Chat
-        </Button>
+        </Button>)}
       </Box>
 
       <Paper 
         elevation={0} 
         sx={{ 
           flex: 1, 
-          p: 2, 
-          mb: 2, 
-          overflow: 'auto',
-          backgroundColor: 'grey.50',
-          border: '1px solid',
-          borderColor: 'grey.200'
+          p: 1, 
+          mb: 0, 
+          overflowY: 'auto',
+          // pb: { xs: 12, sm: 10 }, // 👈 adds space at bottom so last messages are visible
+          scrollBehavior: 'smooth', 
+          // backgroundColor: 'grey.50',
+          // border: '1px solid',
+          // borderColor: 'grey.200'
         }}
       >
         {messages.length === 0 ? (
-          <Box sx={{ textAlign: 'center', color: 'grey.500', mt: 4 }}>
-            <SmartToy sx={{ fontSize: 48, mb: 2 }} />
+          <Box sx={{ textAlign: 'center', color: 'grey.500', my: 4 }}>
+            {/* <AutoAwesomeRoundedIcon sx={{ fontSize: 48, mb: 2 }} /> */}
+            <img 
+              src="/logo/logoanim.svg" 
+              alt="Second Brain Logo" 
+              style={{ 
+                width: isMobile ? 80 : 80, 
+                height: isMobile ? 80 : 80,
+                marginRight: 4 
+              }} 
+            />
             <Typography variant="h6">
               Welcome to Your Second Brain
             </Typography>
@@ -136,7 +150,7 @@ const ChatInterface = () => {
           <List>
             {messages.map((message) => (
               <React.Fragment key={message.id}>
-                <ListItem alignItems="flex-start">
+                <ListItem alignItems="flex-start" sx={{ px: 1}}>
                   <ListItemAvatar>
                     <Avatar sx={{ 
                       bgcolor: message.role === 'user' ? 'primary.main' : 
@@ -205,7 +219,27 @@ const ChatInterface = () => {
         )}
       </Paper>
 
-      <Box sx={{ display: 'flex', gap: 1 }}>
+      <Box 
+        sx={{
+          position: 'fixed',          // stays fixed at bottom even when scrolling
+          bottom: 0,
+          left: '50%',
+          transform: 'translateX(-50%)', // perfectly centers horizontally
+          width: '100%',
+          maxWidth: (theme) => theme.breakpoints.values.md, // equals 900px
+          display: 'flex', flexDirection: 'row',
+          alignItems: 'center',
+          gap: 1,
+          px: 2,
+          py: 1.5,
+          bgcolor: 'background.paper',
+          boxShadow: '0 -2px 10px rgba(0,0,0,0.08)',
+          borderTop: '1px solid grey.200',
+          borderColor: 'grey.200',
+          borderRadius: '16px 16px 0 0',
+          zIndex: 10,
+        }}
+      >
         <TextField
           fullWidth
           variant="outlined"
@@ -215,9 +249,33 @@ const ChatInterface = () => {
           onKeyPress={handleKeyPress}
           disabled={loading}
           multiline
-          maxRows={3}
+          maxRows={8}
+          sx={{
+            bgcolor: 'background.default',
+            borderRadius: 1,
+          }}
+          InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton 
+                      onClick={handleSend}
+                      disabled={loading || !input.trim()}
+                      size="small"
+                      variant="contained"
+                      sx={{ mr: '6px',
+                        color:  'rgba(0, 0, 0, 0.6)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        backdropFilter: 'blur(5px)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)', alignItems: 'flex-end'
+                       }}
+                    >
+                      <ArrowUpwardRoundedIcon color="action" fontSize="small" />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
         />
-        <Button
+        {/* <Button
           variant="contained"
           endIcon={<Send />}
           onClick={handleSend}
@@ -225,7 +283,7 @@ const ChatInterface = () => {
           sx={{ minWidth: 100 }}
         >
           Send
-        </Button>
+        </Button> */}
       </Box>
     </Box>
   );

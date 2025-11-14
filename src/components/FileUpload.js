@@ -21,6 +21,7 @@ import {
   Error
 } from '@mui/icons-material';
 import { secondBrainAPI } from '../services/api';
+import DataVisualizer from './DataVisualizer';
 
 const FileUpload = ({ onUploadSuccess }) => {
   const [files, setFiles] = useState([]);
@@ -112,6 +113,7 @@ const FileUpload = ({ onUploadSuccess }) => {
 
   return (
     <Box>
+    <Box>
       <Typography variant="h5" gutterBottom>
         Upload Files to Your Second Brain
       </Typography>
@@ -125,8 +127,8 @@ const FileUpload = ({ onUploadSuccess }) => {
           p: 3, 
           textAlign: 'center',
           border: '2px dashed',
-          borderColor: 'primary.main',
-          backgroundColor: 'primary.light',
+          borderColor: 'divider',
+          backgroundColor: 'action.hover',
           mb: 3
         }}
       >
@@ -237,6 +239,8 @@ const FileUpload = ({ onUploadSuccess }) => {
           ))}
         </Paper>
       )}
+    </Box>
+      <DataVisualizer/>
     </Box>
   );
 };
