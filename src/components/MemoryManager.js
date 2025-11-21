@@ -1,3 +1,4 @@
+// src/components/MemoryManager.js
 import React, { useState, useEffect } from 'react';
 import {
   Box,
