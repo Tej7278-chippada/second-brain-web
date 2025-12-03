@@ -1,11 +1,12 @@
 // src/services/api.js
 import axios from 'axios';
 
-const API_BASE_URL = 'http://192.168.192.172:8000'; // Flask backend URL
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://192.168.163.172:8000'; // Flask backend URL
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 30000,
+  withCredentials: false, // Important for CORS
 });
 
 export const secondBrainAPI = {
