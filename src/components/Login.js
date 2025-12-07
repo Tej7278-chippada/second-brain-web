@@ -1,5 +1,5 @@
 // src/components/Login.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Paper,
@@ -20,11 +20,7 @@ const Login = ({ onLogin, isMobile }) => {
   const [error, setError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
 
-  useEffect(() => {
-    checkAuthStatus();
-  }, []);
-
-  const checkAuthStatus = async () => {
+  const checkAuthStatus = useCallback( async () => {
     try {
       const result = await authServices.validateToken();
       if (result.valid) {
@@ -36,7 +32,11 @@ const Login = ({ onLogin, isMobile }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate, onLogin]);
+
+  useEffect(() => {
+    checkAuthStatus();
+  }, [checkAuthStatus]);
 
   const handleGoogleSuccess = async (response) => {
     try {
