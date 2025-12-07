@@ -12,7 +12,9 @@ import {
   IconButton,
   LinearProgress,
   Alert,
-  Chip
+  Chip,
+  Fade,
+  Tooltip
 } from '@mui/material';
 import {
   Upload,
@@ -24,46 +26,63 @@ import {
 import { secondBrainAPI } from '../services/api';
 import DataVisualizer from './DataVisualizer';
 
-const FileUpload = ({ onUploadSuccess }) => {
+const FileUpload = ({ onUploadSuccess, isMobile }) => {
   const [files, setFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [uploadResults, setUploadResults] = useState([]);
+  const [dragActive, setDragActive] = useState(false);
 
-  const handleFileSelect = (event) => {
-    const selectedFiles = Array.from(event.target.files);
+  // FILE SELECT
+  const handleFileSelect = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    addFiles(selectedFiles);
+  };
+
+  // DRAG & DROP HANDLERS
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragActive(false);
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    addFiles(droppedFiles);
+  };
+
+  const addFiles = (selectedFiles) => {
     const newFiles = selectedFiles.map(file => ({
       file,
       id: Date.now() + Math.random(),
-      status: 'pending'
+      status: 'pending',
+      progress: 0
     }));
     setFiles(prev => [...prev, ...newFiles]);
   };
 
   const handleUpload = async () => {
-    if (files.length === 0) return;
+    if (!files.length) return;
 
     setUploading(true);
     const results = [];
 
-    for (const fileObj of files) {
+    for (let fileObj of files) {
       try {
         fileObj.status = 'uploading';
+        fileObj.progress = 30;
         setFiles([...files]); // Trigger re-render
 
         const result = await secondBrainAPI.uploadFile(fileObj.file);
+        fileObj.progress = 100;
+        fileObj.status = 'success';
         results.push({
           filename: fileObj.file.name,
           status: 'success',
           result
         });
-        fileObj.status = 'success';
       } catch (error) {
+        fileObj.status = 'error';
         results.push({
           filename: fileObj.file.name,
           status: 'error',
           error: error.message
         });
-        fileObj.status = 'error';
       }
       setFiles([...files]); // Update progress
     }
@@ -106,16 +125,22 @@ const FileUpload = ({ onUploadSuccess }) => {
       case 'error':
         return <Error color="error" />;
       case 'uploading':
-        return <LinearProgress sx={{ width: 24 }} />;
+        return <LinearProgress sx={{ width: 24, borderRadius: '12px' }} />;
       default:
         return <Upload color="disabled" />;
     }
   };
 
+  const formatFileSize = (bytes) => {
+    if (!bytes) return 'Unknown';
+    const mb = bytes / 1024 / 1024;
+    return mb < 1 ? `${(bytes / 1024).toFixed(2)} KB` : `${mb.toFixed(2)} MB`;
+  };
+
   return (
     <Box>
     <Box>
-      <Typography variant="h5" gutterBottom>
+      <Typography variant={isMobile ? 'h6' : 'h5'} gutterBottom>
         Upload Files to Your Second Brain
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
@@ -123,14 +148,19 @@ const FileUpload = ({ onUploadSuccess }) => {
       </Typography>
 
       <Paper 
-        elevation={2} 
+        elevation={dragActive ? 6 : 2}
+        onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+        onDragLeave={() => setDragActive(false)}
+        onDrop={handleDrop}
         sx={{ 
           p: 3, 
           textAlign: 'center',
           border: '2px dashed',
-          borderColor: 'divider',
-          backgroundColor: 'action.hover',
-          mb: 3
+          borderColor: dragActive ? 'primary.main' : 'divider',
+          backgroundColor: dragActive ? 'primary.light' : 'action.hover',
+          mb: 3,
+          transition: '0.3s',
+          borderRadius: 3
         }}
       >
         <input
@@ -152,13 +182,15 @@ const FileUpload = ({ onUploadSuccess }) => {
             Select Files
           </Button>
         </label>
-        <Typography variant="body2" sx={{ mt: 1 }}>
-          Click to select files or drag and drop
+        <Typography mt={2} color="text.secondary">
+          Drag & drop files here or click to browse
         </Typography>
       </Paper>
 
+      {/* FILE LIST */}
       {files.length > 0 && (
-        <Paper elevation={1} sx={{ p: 2, mb: 3 }}>
+      <Fade in={files.length > 0}>
+        <Paper sx={{ p: 2, mb: 3, borderRadius: 3 }}>
           <Typography variant="h6" gutterBottom>
             Selected Files ({files.length})
           </Typography>
@@ -184,20 +216,36 @@ const FileUpload = ({ onUploadSuccess }) => {
                     {getFileIcon(fileObj.file.name)}
                   </Typography>
                 </ListItemIcon>
-                <ListItemText
-                  primary={fileObj.file.name}
-                  secondary={`${(fileObj.file.size / 1024 / 1024).toFixed(2)} MB`}
-                />
+                <Tooltip title={fileObj.file.name} placement="top" arrow>
+                  <ListItemText
+                    primary={fileObj.file.name}
+                    secondary= {formatFileSize(fileObj.file.size)}
+                    sx={{
+                      maxWidth: isMobile ? 160 : 340,   // ✅ Responsive width cap
+                      overflow: "hidden",
+                      whiteSpace: "nowrap",
+                      textOverflow: "ellipsis",
+                      
+                      "& .MuiListItemText-primary": {
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        fontWeight: 500
+                      }
+                    }}
+                  />
+                </Tooltip>
+
               </ListItem>
             ))}
           </List>
 
-          <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+          <Box sx={{ display: 'flex', gap: 2, mt: 2, width:'100%', justifyContent: 'flex-end' }}>
             <Button
               variant="contained"
               onClick={handleUpload}
               disabled={uploading || files.length === 0}
-              fullWidth
+              // fullWidth
             >
               {uploading ? 'Uploading...' : `Upload ${files.length} Files`}
             </Button>
@@ -210,10 +258,10 @@ const FileUpload = ({ onUploadSuccess }) => {
             </Button>
           </Box>
         </Paper>
-      )}
+      </Fade>)}
 
       {uploadResults.length > 0 && (
-        <Paper elevation={1} sx={{ p: 2 }}>
+        <Paper elevation={1} sx={{ p: 2, borderRadius: 3 }}>
           <Typography variant="h6" gutterBottom>
             Upload Results
           </Typography>

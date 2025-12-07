@@ -91,9 +91,9 @@ function AppContent() {
         <Route path="/" element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
             <>
-              <Header user={user} onLogout={handleLogout} />
+              <Header user={user} onLogout={handleLogout} isMobile={isMobile}/>
               <Container maxWidth="md" sx={{ flex: 1, px: 1, py: 2 }}>
-                <SecondBrainApp user={user} />
+                <SecondBrainApp user={user} isMobile={isMobile}/>
               </Container>
             </>
           </ProtectedRoute>

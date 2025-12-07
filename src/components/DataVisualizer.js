@@ -28,7 +28,7 @@ import {
 } from '@mui/icons-material';
 import { secondBrainAPI } from '../services/api';
 
-const DataVisualizer = () => {
+const DataVisualizer = ({isMobile}) => {
   const [documents, setDocuments] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredDocs, setFilteredDocs] = useState([]);
@@ -54,7 +54,7 @@ const DataVisualizer = () => {
   const loadDocuments = async () => {
     try {
       const data = await secondBrainAPI.getDocuments();
-      setDocuments(data.documents || []);
+      setDocuments(data.documents.reverse() || []);
     } catch (error) {
       console.error('Error loading documents:', error);
     }
@@ -96,7 +96,7 @@ const DataVisualizer = () => {
 
   return (
     <Box>
-      <Typography variant="h5" gutterBottom>
+      <Typography variant={isMobile ? 'h6' : 'h5'} gutterBottom>
         Knowledge Base Documents
       </Typography>
 
@@ -150,7 +150,22 @@ const DataVisualizer = () => {
                   <ListItemText
                     primary={
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                        <Typography variant="subtitle1" sx={{ cursor: 'pointer' }} onClick={() => setSelectedDoc(doc)}>
+                        <Typography variant="subtitle1" 
+                          sx={{ cursor: 'pointer',
+                            // maxWidth: isMobile ? 260 : 540,
+                            overflow: "hidden",
+                            whiteSpace: "nowrap",
+                            textOverflow: "ellipsis",
+                            
+                            "& .MuiListItemText-primary": {
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                              fontWeight: 500
+                            }
+                           }} 
+                          onClick={() => setSelectedDoc(doc)}
+                          >
                           {doc.file_name}
                         </Typography>
                         <Chip
@@ -167,7 +182,21 @@ const DataVisualizer = () => {
                     }
                     secondary={
                       <Box>
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography variant="body2" color="text.secondary"
+                          sx={{
+                            // maxWidth: isMobile ? 360 : 740,   // ✅ Responsive width cap
+                            overflow: "hidden",
+                            whiteSpace: "nowrap",
+                            textOverflow: "ellipsis",
+                            
+                            "& .MuiListItemText-primary": {
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                              fontWeight: 500
+                            }
+                          }}
+                        >
                           {doc.content_preview}
                         </Typography>
                         <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
@@ -195,33 +224,124 @@ const DataVisualizer = () => {
         onClose={() => setSelectedDoc(null)}
         maxWidth="md"
         fullWidth
+        scroll="paper"
       >
-        <DialogTitle>
-          Document Details: {selectedDoc?.file_name}
-        </DialogTitle>
-        <DialogContent>
+        <DialogTitle
+        sx={{
+          fontWeight: 600,
+          display: "flex",
+          alignItems: "flex-start",
+          gap: 1,
+          whiteSpace: "normal",      //  Allows wrapping
+          wordBreak: "break-word",   // Breaks very long words
+          lineHeight: 1.4
+        }}
+      >
+        <span>📄</span>
+
+        <Typography
+          variant="subtitle1"
+          sx={{
+            // fontWeight: 600,
+            whiteSpace: "normal",     // Multiline enabled
+            wordBreak: "break-word", // Prevents overflow
+            maxWidth: "100%"         // Fits dialog width
+          }}
+        >
+          {selectedDoc?.file_name}
+        </Typography>
+      </DialogTitle>
+
+
+        <DialogContent
+          dividers
+          sx={{
+            bgcolor: 'background.default',
+            p: isMobile ? 2 : 3
+          }}
+        >
           {selectedDoc && (
             <Box>
-              <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-                <Chip label={`Type: ${selectedDoc.file_type}`} />
-                <Chip label={`Size: ${formatFileSize(selectedDoc.file_size)}`} />
-                <Chip label={`Chunk: ${selectedDoc.chunk_index + 1}/${selectedDoc.total_chunks}`} />
+
+              {/* META INFO CHIPS */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 1.2,
+                  mb: 2
+                }}
+              >
+                <Chip label={`Type: ${selectedDoc.file_type}`} size="small" />
+                <Chip label={`Size: ${formatFileSize(selectedDoc.file_size)}`} size="small" />
+                <Chip
+                  label={`Chunk ${selectedDoc.chunk_index + 1} / ${selectedDoc.total_chunks}`}
+                  color="primary"
+                  size="small"
+                />
+                <Chip
+                  label={`Added: ${new Date(selectedDoc.ingestion_time).toLocaleString()}`}
+                  variant="outlined"
+                  size="small"
+                />
               </Box>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
-                Added: {new Date(selectedDoc.ingestion_time).toLocaleString()}
+
+              <Divider sx={{ mb: 2 }} />
+
+              {/* CONTENT HEADER */}
+              <Typography variant="subtitle1" fontWeight={600} mb={1}>
+                📚 Extracted Knowledge Content
               </Typography>
-              <Paper variant="outlined" sx={{ p: 2, mt: 2 }}>
-                <Typography variant="body1" component="pre" sx={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>
+
+              {/* CONTENT VIEW BOX */}
+              <Paper
+                variant="outlined"
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  bgcolor: 'action.hover',
+                  maxHeight: isMobile ? 300 : 420,
+                  overflowY: 'auto',
+                  lineHeight: 1.7,
+                  fontSize: 14
+                }}
+              >
+                <Typography
+                  component="pre"
+                  sx={{
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                    fontFamily: 'inherit'
+                  }}
+                >
                   {selectedDoc.content_preview}
                 </Typography>
               </Paper>
+
+              {/* COPY BUTTON */}
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() =>
+                    navigator.clipboard.writeText(selectedDoc.content_preview)
+                  }
+                >
+                  Copy Text
+                </Button>
+              </Box>
+
             </Box>
           )}
         </DialogContent>
+
         <DialogActions>
-          <Button onClick={() => setSelectedDoc(null)}>Close</Button>
+          <Button onClick={() => setSelectedDoc(null)} variant="contained">
+            Close
+          </Button>
         </DialogActions>
       </Dialog>
+
 
       {/* Delete Confirmation Dialog */}
       <Dialog
@@ -230,8 +350,13 @@ const DataVisualizer = () => {
       >
         <DialogTitle>Delete Document</DialogTitle>
         <DialogContent>
-          <Typography>
-            Are you sure you want to delete "{deleteDialog}"? This will remove all chunks of this document from your knowledge base.
+          <Typography sx={{
+            // fontWeight: 600,
+            whiteSpace: "normal",     // Multiline enabled
+            wordBreak: "break-word", // Prevents overflow
+            maxWidth: "100%"         // Fits dialog width
+          }}>
+            Are you sure you want to delete "<strong>{deleteDialog}</strong>"? This will remove all chunks of this document from your knowledge base.
           </Typography>
         </DialogContent>
         <DialogActions>

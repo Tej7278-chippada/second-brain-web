@@ -158,11 +158,11 @@ function SecondBrainApp({ user, isMobile, darkMode }) {
       case 'chat':
         return <ChatInterface user={user} isMobile={isMobile} />;
       case 'upload':
-        return <FileUpload onUploadSuccess={checkSystemStatus} />;
+        return <FileUpload onUploadSuccess={checkSystemStatus} isMobile={isMobile} />;
       case 'memories':
-        return <MemoryManager />;
+        return <MemoryManager isMobile={isMobile} />;
       case 'data':
-        return <DataVisualizer />;
+        return <DataVisualizer isMobile={isMobile} />;
       default:
         return <ChatInterface user={user} isMobile={isMobile} />;
     }
