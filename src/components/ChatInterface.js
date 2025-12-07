@@ -21,7 +21,7 @@ import {
 import {
   // Send,
   SmartToy,
-  Person,
+  // Person,
   Clear
 } from '@mui/icons-material';
 import { secondBrainAPI } from '../services/api';
@@ -170,9 +170,17 @@ const ChatInterface = ({user, isMobile}) => {
                   <ListItemAvatar>
                     <Avatar sx={{ 
                       bgcolor: message.role === 'user' ? 'primary.main' : 
-                              message.role === 'error' ? 'error.main' : 'secondary.main'
-                    }}>
-                      {message.role === 'user' ? <Person /> : <SmartToy />}
+                              message.role === 'error' ? null : null,
+                      // border: message.role === 'user' ? '3px solid rgba(0, 0, 0, 0.6)' : 
+                      //         message.role === 'error' ? '3px solid rgba(255, 0, 0, 0.6)' : null,
+                      borderRadius: message.role === 'user' ? '50%' : '8px',
+                    }}
+                    src={
+                      message.role === 'user'
+                        ? user.profile_pic
+                        : "/logo/logo1.svg" 
+                    }>
+                      {message.role === 'user' ? user.username[0]?.toUpperCase() : <SmartToy />}
                     </Avatar>
                   </ListItemAvatar>
                   <ListItemText
@@ -208,8 +216,13 @@ const ChatInterface = ({user, isMobile}) => {
                           {message.content}
                         </Typography>
                         {message.sources && message.sources.length > 0 && (
-                          <Box sx={{ mt: 1, alignContent: 'center' }}>
-                            <StorageRoundedIcon sx={{ fontSize: 18, marginRight: 0.5 }} />
+                          <Box sx={{ mt: 1, alignContent: 'center',
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            justifyContent: 'flex-start', // centers horizontally as a group
+                            gap: 0.5,
+                           }}>
+                            <StorageRoundedIcon sx={{ fontSize: 18 }} />
                             <Typography variant="caption" color="text.secondary">
                               Sources: {message.sources.join(', ')}
                             </Typography>
@@ -226,9 +239,10 @@ const ChatInterface = ({user, isMobile}) => {
               </React.Fragment>
             ))}
             {loading && (
-              <ListItem>
+              <ListItem alignItems="flex-start" sx={{ px: 1}}>
                 <ListItemAvatar>
-                  <Avatar sx={{ bgcolor: 'secondary.main' }}>
+                  <Avatar sx={{ bgcolor: null, borderRadius: '8px' }}
+                    src={"/logo/logo1.svg"}>
                     <SmartToy />
                   </Avatar>
                 </ListItemAvatar>

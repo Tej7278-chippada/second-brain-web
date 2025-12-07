@@ -10,7 +10,9 @@ import {
   Menu,
   MenuItem,
   // Chip,
-  Tooltip
+  Tooltip,
+  Avatar,
+  // Chip
 } from '@mui/material';
 import {
   // Psychology as BrainIcon,
@@ -19,7 +21,7 @@ import {
 } from '@mui/icons-material';
 // import { useNavigate } from 'react-router-dom';
 
-function Header({ user, onLogout, isMobile }) {
+function Header({ user, onLogout, isMobile, darkMode }) {
   // const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -84,13 +86,40 @@ function Header({ user, onLogout, isMobile }) {
               }
             /> */}
             
-            <Tooltip title="Account menu">
+            <Tooltip title="Account menu" arrow>
               <IconButton
                 onClick={handleMenu}
                 color="inherit"
                 size="small"
+                sx={{
+                  p: 0,
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'scale(1.1)',
+                  }
+                }}
               >
-                <AccountIcon />
+                {/* <AccountIcon /> */}
+                <Avatar
+                  src={
+                    user.profile_pic === null
+                      ? 'https://placehold.co/56x56?text=No+Image'
+                      : user.profile_pic
+                  }
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    border: darkMode ? '3px solid rgba(168, 168, 168, 0.8)' : '3px solid rgba(255, 255, 255, 0.8)',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                    transition: 'all 0.3s ease',
+                    background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)',
+                    color: 'white',
+                    fontSize: '1rem',
+                    fontWeight: 600,
+                  }}
+                >
+                  {user.username[0]?.toUpperCase()}
+                </Avatar>
               </IconButton>
             </Tooltip>
             
@@ -106,6 +135,15 @@ function Header({ user, onLogout, isMobile }) {
                 }
               }}
             >
+              {/* User Info Header */}
+              <Box sx={{ px: 2, py: 1.5, borderBottom: `1px solid ${darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.1)'}` }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#4361ee' }}>
+                  Welcome back!
+                </Typography>
+                <Typography variant="body2" sx={{ color: darkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(255, 255, 255, 0.6)' }}>
+                  {user.username}
+                </Typography>
+              </Box>
               <MenuItem onClick={handleProfile}>
                 <AccountIcon sx={{ mr: 1 }} fontSize="small" />
                 Profile

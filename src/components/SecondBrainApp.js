@@ -5,7 +5,7 @@ import {
   Alert,
   ToggleButtonGroup,
   ToggleButton,
-  Paper,
+  // Paper,
   CircularProgress,
   // Typography
 } from '@mui/material';
@@ -314,13 +314,13 @@ function SecondBrainApp({ user, isMobile, darkMode }) {
       )}
 
       {/* Main Content */}
-      <Paper elevation={1} sx={{ 
+      {/* <Paper elevation={1} sx={{ 
         p: isMobile ? 2 : 3, 
         minHeight: '60vh',
         borderRadius: 2
-      }}>
+      }}> */}
         {renderContent()}
-      </Paper>
+      {/* </Paper> */}
     </Box>
   );
 }
