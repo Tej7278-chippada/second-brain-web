@@ -26,8 +26,9 @@ import {
 } from '@mui/icons-material';
 import { secondBrainAPI } from '../services/api';
 import ArrowUpwardRoundedIcon from '@mui/icons-material/ArrowUpwardRounded';
+import StorageRoundedIcon from '@mui/icons-material/StorageRounded';
 
-const ChatInterface = ({isMobile}) => {
+const ChatInterface = ({user, isMobile}) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -36,6 +37,20 @@ const ChatInterface = ({isMobile}) => {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  // Add user greeting on first load
+  // useEffect(() => {
+  //   if (user && messages.length === 0) {
+  //     const greeting = {
+  //       id: Date.now(),
+  //       content: `Hello ${user.username}! How can I help you today?`,
+  //       role: 'assistant',
+  //       timestamp: new Date(),
+  //       isGreeting: true
+  //     };
+  //     setMessages([greeting]);
+  //   }
+  // }, [user]);
 
   useEffect(() => {
     scrollToBottom();
@@ -178,11 +193,23 @@ const ChatInterface = ({isMobile}) => {
                     }
                     secondary={
                       <Box>
-                        <Typography variant="body1" sx={{ mb: 1 }}>
+                        <Typography variant="body1" sx={{ mb: 1 }}
+                          style={{
+                          // marginTop: '0.5rem',
+                          lineHeight: '1.5',
+                          // textAlign: 'justify',
+                          whiteSpace: "pre-wrap", // Retain line breaks and tabs
+                          wordWrap: "break-word", // Handle long words gracefully
+                          // backgroundColor: "#f5f5f5",
+                          // padding: "1rem",
+                          borderRadius: "8px",
+                          // border: "1px solid #ddd",
+                        }}>
                           {message.content}
                         </Typography>
                         {message.sources && message.sources.length > 0 && (
-                          <Box sx={{ mt: 1 }}>
+                          <Box sx={{ mt: 1, alignContent: 'center' }}>
+                            <StorageRoundedIcon sx={{ fontSize: 18, marginRight: 0.5 }} />
                             <Typography variant="caption" color="text.secondary">
                               Sources: {message.sources.join(', ')}
                             </Typography>

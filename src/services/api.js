@@ -3,71 +3,222 @@ import axios from 'axios';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://192.168.163.172:8000'; // Flask backend URL
 
+// Create axios instance with default config
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 30000,
-  withCredentials: false, // Important for CORS
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  // withCredentials: false, // Important for CORS
 });
 
+// Request interceptor to add auth token
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor to handle auth errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const originalRequest = error.config;
+    
+    // Handle 401 Unauthorized
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      
+      // Clear invalid token
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('user');
+      
+      // Redirect to login page
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+    }
+    
+    // Handle network errors
+    if (!error.response) {
+      console.error('Network error:', error);
+      // You could show a network error notification here
+    }
+    
+    return Promise.reject(error);
+  }
+);
+
+// Auth services
+export const authServices = {
+  async googleLogin(token, clientId) {
+    try {
+      const response = await api.post('/api/auth/google', {
+        token,
+        clientId
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Google login error:', error);
+      throw error;
+    }
+  },
+
+  async validateToken() {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        return { valid: false, message: 'No token found' };
+      }
+      
+      const response = await api.get('/api/auth/validate');
+      return response.data;
+    } catch (error) {
+      console.error('Token validation error:', error);
+      return { 
+        valid: false, 
+        message: error.response?.data?.error || 'Token validation failed' 
+      };
+    }
+  },
+
+  async getProfile() {
+    try {
+      const response = await api.get('/api/auth/profile');
+      return response.data;
+    } catch (error) {
+      console.error('Get profile error:', error);
+      throw error;
+    }
+  },
+
+  async logout() {
+    try {
+      await api.post('/api/auth/logout');
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('user');
+    }
+  }
+};
+
+// Second Brain API services
 export const secondBrainAPI = {
-  // System status
+  // System status (public)
   async getStatus() {
-    const response = await api.get('/status');
-    return response.data;
+    try {
+      const response = await api.get('/status');
+      return response.data;
+    } catch (error) {
+      console.error('Status check error:', error);
+      throw error;
+    }
   },
 
-  // Chat
+  // Chat (protected)
   async sendMessage(message, useHistory = true) {
-    const response = await api.post('/query', {
-      question: message,
-      use_history: useHistory
-    });
-    return response.data;
+    try {
+      const response = await api.post('/query', {
+        question: message,
+        use_history: useHistory
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Send message error:', error);
+      throw error;
+    }
   },
 
-  // File upload
+  // File upload (protected)
   async uploadFile(file) {
     const formData = new FormData();
     formData.append('file', file);
     
-    const response = await api.post('/ingest', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
+    try {
+      const response = await api.post('/ingest', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('File upload error:', error);
+      throw error;
+    }
   },
 
-  // Memories
+  // Memories (protected)
   async getMemories() {
-    const response = await api.get('/memories');
-    return response.data;
+    try {
+      const response = await api.get('/memories');
+      return response.data;
+    } catch (error) {
+      console.error('Get memories error:', error);
+      throw error;
+    }
   },
 
   async addMemory(command) {
-    const response = await api.post('/memories', { command });
-    return response.data;
+    try {
+      const response = await api.post('/memories', { command });
+      return response.data;
+    } catch (error) {
+      console.error('Add memory error:', error);
+      throw error;
+    }
   },
 
   async deleteMemory(memoryKey) {
-    const response = await api.delete(`/memories/${memoryKey}`);
-    return response.data;
+    try {
+      const response = await api.delete(`/memories/${memoryKey}`);
+      return response.data;
+    } catch (error) {
+      console.error('Delete memory error:', error);
+      throw error;
+    }
   },
 
-  // Data management
+  // Documents (protected)
   async getDocuments() {
-    const response = await api.get('/documents');
-    return response.data;
+    try {
+      const response = await api.get('/documents');
+      return response.data;
+    } catch (error) {
+      console.error('Get documents error:', error);
+      throw error;
+    }
   },
 
   async deleteDocument(filename) {
-    const response = await api.delete(`/documents/${filename}`);
-    return response.data;
+    try {
+      const response = await api.delete(`/documents/${filename}`);
+      return response.data;
+    } catch (error) {
+      console.error('Delete document error:', error);
+      throw error;
+    }
   },
 
   async searchDocuments(query) {
-    const response = await api.get('/search', { params: { q: query } });
-    return response.data;
+    try {
+      const response = await api.get('/search', { 
+        params: { q: query } 
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Search documents error:', error);
+      throw error;
+    }
   }
 };
 
