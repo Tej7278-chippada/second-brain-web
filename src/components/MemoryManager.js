@@ -120,8 +120,8 @@ const MemoryManager = () => {
         <Alert severity="info" sx={{ mb: 2 }}>
           Use natural language to add memories. Examples:
           "memorize my phone number as 1234567890", 
-          "remember that John owes me 5000 rupees",
-          "store tulasi's phone number as 7278949280"
+          "remember this John owes me 5000 rupees",
+          "store this tulasi's phone number as 7278949280"
         </Alert>
         
         <Box sx={{ display: 'flex', gap: 1 }}>
@@ -196,6 +196,7 @@ const MemoryManager = () => {
                             />
                           </Box>
                         }
+                        secondaryTypographyProps={{ component: "div" }}
                         secondary={
                           <Box>
                             <Typography variant="body1">

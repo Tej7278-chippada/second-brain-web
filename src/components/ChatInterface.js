@@ -199,6 +199,7 @@ const ChatInterface = ({user, isMobile}) => {
                         )}
                       </Box>
                     }
+                    secondaryTypographyProps={{ component: "div" }}
                     secondary={
                       <Box>
                         <Typography variant="body1" sx={{ mb: 1 }}

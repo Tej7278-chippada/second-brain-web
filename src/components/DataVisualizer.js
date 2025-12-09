@@ -180,6 +180,7 @@ const DataVisualizer = ({isMobile}) => {
                         />
                       </Box>
                     }
+                    secondaryTypographyProps={{ component: "div" }}
                     secondary={
                       <Box>
                         <Typography variant="body2" color="text.secondary"
@@ -204,7 +205,7 @@ const DataVisualizer = ({isMobile}) => {
                             Size: {formatFileSize(doc.file_size)}
                           </Typography>
                           <Typography variant="caption">
-                            Added: {new Date(doc.ingestion_time).toLocaleDateString()}
+                            Added: {new Date(doc.ingestion_time).toLocaleString()}
                           </Typography>
                         </Box>
                       </Box>
@@ -227,6 +228,7 @@ const DataVisualizer = ({isMobile}) => {
         scroll="paper"
       >
         <DialogTitle
+        component="div"
         sx={{
           fontWeight: 600,
           display: "flex",

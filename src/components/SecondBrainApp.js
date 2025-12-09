@@ -79,8 +79,8 @@ const SliderThumb = styled(Box)(({ theme, position }) => ({
 function SecondBrainApp({ user, isMobile, darkMode }) {
   const [activeTab, setActiveTab] = useState('chat');
   const [systemStatus, setSystemStatus] = useState({
-    documents: 0,
-    memories: 0,
+    // documents: 0,
+    // memories: 0,
     isConnected: false,
     loading: true,
     error: null
@@ -94,9 +94,9 @@ function SecondBrainApp({ user, isMobile, darkMode }) {
     try {
       const status = await secondBrainAPI.getStatus();
       setSystemStatus({
-        documents: status.documents || 0,
-        memories: status.memories || 0,
-        isConnected: true,
+        // documents: status.documents || 0,
+        // memories: status.memories || 0,
+        isConnected: status.is_connected || true,
         loading: false,
         error: null
       });

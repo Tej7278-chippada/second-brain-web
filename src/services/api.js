@@ -125,7 +125,7 @@ export const secondBrainAPI = {
     }
   },
 
-  // Chat (protected)
+  // Chat (protected - user isolated)
   async sendMessage(message, useHistory = true) {
     try {
       const response = await api.post('/query', {
@@ -139,7 +139,7 @@ export const secondBrainAPI = {
     }
   },
 
-  // File upload (protected)
+  // File upload (protected - user isolated)
   async uploadFile(file) {
     const formData = new FormData();
     formData.append('file', file);
@@ -157,13 +157,25 @@ export const secondBrainAPI = {
     }
   },
 
-  // Memories (protected)
+  // Memories (protected - user isolated)
   async getMemories() {
     try {
       const response = await api.get('/memories');
       return response.data;
     } catch (error) {
       console.error('Get memories error:', error);
+      throw error;
+    }
+  },
+
+  async searchMemories(query) {
+    try {
+      const response = await api.get('/memories/search', { 
+        params: { q: query } 
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Search memories error:', error);
       throw error;
     }
   },
@@ -178,9 +190,28 @@ export const secondBrainAPI = {
     }
   },
 
-  async deleteMemory(memoryKey) {
+  async addMemoryDirect(category, key, value, description = '') {
     try {
-      const response = await api.delete(`/memories/${memoryKey}`);
+      const response = await api.post('/memories', { 
+        category, 
+        key, 
+        value, 
+        description 
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Add memory direct error:', error);
+      throw error;
+    }
+  },
+
+  async deleteMemory(memoryKey, category = null) {
+    try {
+      const url = category 
+        ? `/memories/${memoryKey}?category=${encodeURIComponent(category)}`
+        : `/memories/${memoryKey}`;
+      
+      const response = await api.delete(url);
       return response.data;
     } catch (error) {
       console.error('Delete memory error:', error);
@@ -188,7 +219,7 @@ export const secondBrainAPI = {
     }
   },
 
-  // Documents (protected)
+  // Documents (protected - user isolated)
   async getDocuments() {
     try {
       const response = await api.get('/documents');
@@ -219,7 +250,69 @@ export const secondBrainAPI = {
       console.error('Search documents error:', error);
       throw error;
     }
-  }
+  },
+
+  // User stats (protected - user isolated)
+  async getUserStats() {
+    try {
+      const response = await api.get('/stats');
+      return response.data;
+    } catch (error) {
+      console.error('Get user stats error:', error);
+      throw error;
+    }
+  },
+
+  async getUploadInfo() {
+    try {
+      const response = await api.get('/documents/upload-url');
+      return response.data;
+    } catch (error) {
+      console.error('Get upload info error:', error);
+      throw error;
+    }
+  },
+
+  async exportMemories() {
+    try {
+      const response = await api.get('/export/memories');
+      return response.data;
+    } catch (error) {
+      console.error('Export memories error:', error);
+      throw error;
+    }
+  },
+
+  // Conversation History (protected - user isolated)
+  async getConversationHistory() {
+    try {
+      const response = await api.get('/conversation/history');
+      return response.data;
+    } catch (error) {
+      console.error('Get conversation history error:', error);
+      throw error;
+    }
+  },
+
+  async clearConversationHistory() {
+    try {
+      const response = await api.delete('/conversation/history');
+      return response.data;
+    } catch (error) {
+      console.error('Clear conversation history error:', error);
+      throw error;
+    }
+  },
+
+  async exportConversationHistory() {
+    try {
+      const response = await api.get('/conversation/history/export');
+      return response.data;
+    } catch (error) {
+      console.error('Export conversation history error:', error);
+      throw error;
+    }
+  },
 };
 
 // Error handling interceptor
