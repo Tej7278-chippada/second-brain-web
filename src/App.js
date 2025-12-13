@@ -18,6 +18,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Header from './components/Header';
 import SecondBrainApp from './components/SecondBrainApp';
 import './App.css';
+import { ChatProvider } from './contexts/ChatContext';
 
 // Loading component
 const LoadingScreen = () => (
@@ -90,12 +91,12 @@ function AppContent() {
         {/* Protected routes */}
         <Route path="/" element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
-            <>
+            <ChatProvider user={user}> {/* Wrap with ChatProvider */}
               <Header user={user} onLogout={handleLogout} isMobile={isMobile}/>
               <Container maxWidth="md" sx={{ flex: 1, px: 1, py: 2 }}>
                 <SecondBrainApp user={user} isMobile={isMobile}/>
               </Container>
-            </>
+            </ChatProvider>
           </ProtectedRoute>
         } />
         

@@ -38,12 +38,23 @@ import { secondBrainAPI } from '../services/api';
 import ArrowUpwardRoundedIcon from '@mui/icons-material/ArrowUpwardRounded';
 import StorageRoundedIcon from '@mui/icons-material/StorageRounded';
 import { formatDistanceToNow } from 'date-fns';
+import { useChat } from '../contexts/ChatContext';
 
 const ChatInterface = ({ user, isMobile }) => {
-  const [messages, setMessages] = useState([]);
+  const { 
+    messages, 
+    conversationHistory, 
+    isLoadingHistory,
+    addMessage, 
+    clearMessages, 
+    loadConversationHistory,
+    addToConversationHistory
+  } = useChat(); // Use chat context
+
+  // const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [conversationHistory, setConversationHistory] = useState([]);
+  // const [conversationHistory, setConversationHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
@@ -51,7 +62,9 @@ const ChatInterface = ({ user, isMobile }) => {
   const inputRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
   };
 
   // Add user greeting on first load
@@ -75,17 +88,17 @@ const ChatInterface = ({ user, isMobile }) => {
   useEffect(() => {
     // loadConversationHistory();
     inputRef.current?.focus();
-  }, []);
+  }, [loadConversationHistory]);
 
-  const loadConversationHistory = async () => {
-    try {
-      const data = await secondBrainAPI.getConversationHistory();
-      setConversationHistory(data.history || []);
-    } catch (error) {
-      showSnackbar('Failed to load conversation history.', 'error');
-      // console.error('Failed to load conversation history:', error);
-    }
-  };
+  // const loadConversationHistory = async () => {
+  //   try {
+  //     const data = await secondBrainAPI.getConversationHistory();
+  //     setConversationHistory(data.history || []);
+  //   } catch (error) {
+  //     showSnackbar('Failed to load conversation history.', 'error');
+  //     // console.error('Failed to load conversation history:', error);
+  //   }
+  // };
 
   const showSnackbar = (message, severity = 'info') => {
     setSnackbar({ open: true, message, severity });
@@ -101,7 +114,7 @@ const ChatInterface = ({ user, isMobile }) => {
       timestamp: new Date()
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    addMessage(userMessage);
     setInput('');
     setLoading(true);
 
@@ -117,9 +130,11 @@ const ChatInterface = ({ user, isMobile }) => {
         confidence: response.confidence
       };
 
-      setMessages(prev => [...prev, assistantMessage]);
+      addMessage(assistantMessage);
       // loadConversationHistory(); // Refresh history
       setShowHistory(false);
+      // Add to conversation history
+      addToConversationHistory(userMessage, assistantMessage);
     } catch (error) {
       const errorMessage = {
         id: Date.now() + 1,
@@ -127,7 +142,7 @@ const ChatInterface = ({ user, isMobile }) => {
         role: 'error',
         timestamp: new Date()
       };
-      setMessages(prev => [...prev, errorMessage]);
+      addMessage(errorMessage);
       showSnackbar('Failed to send message. Please try again.', 'error');
     } finally {
       setLoading(false);
@@ -144,7 +159,7 @@ const ChatInterface = ({ user, isMobile }) => {
   const clearChat = async () => {
     try {
       await secondBrainAPI.clearConversationHistory();
-      setMessages([]);
+      clearMessages();
       setShowHistory(false);
       // loadConversationHistory();
       showSnackbar('Conversation history cleared', 'success');
@@ -156,6 +171,17 @@ const ChatInterface = ({ user, isMobile }) => {
   const exportConversation = async () => {
     try {
       const data = await secondBrainAPI.exportConversationHistory();
+      // const chatData = {
+      //   user: user?.username || 'Anonymous',
+      //   exportedAt: new Date().toISOString(),
+      //   messages: messages.map(msg => ({
+      //     role: msg.role,
+      //     content: msg.content,
+      //     timestamp: msg.timestamp.toISOString(),
+      //     sources: msg.sources,
+      //     confidence: msg.confidence
+      //   }))
+      // };
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -190,6 +216,11 @@ const ChatInterface = ({ user, isMobile }) => {
 
   const handleMenuClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleLoadHistory = async () => {
+    await loadConversationHistory();
+    setShowHistory(!showHistory);
   };
 
   return (
@@ -233,12 +264,20 @@ const ChatInterface = ({ user, isMobile }) => {
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
             onClose={handleMenuClose}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
           >
             <MenuItem onClick={() => { handleMenuClose(); exportConversation(); }}>
               <Download sx={{ mr: 1 }} fontSize="small" />
               Export Conversation
             </MenuItem>
-            <MenuItem onClick={() => { handleMenuClose(); loadConversationHistory(); setShowHistory(!showHistory); }}>
+            <MenuItem onClick={() => { handleMenuClose(); handleLoadHistory(); }}>
               <History sx={{ mr: 1 }} fontSize="small" />
               {showHistory ? 'Hide History' : 'Show History'}
             </MenuItem>
@@ -257,9 +296,20 @@ const ChatInterface = ({ user, isMobile }) => {
             <Typography variant="subtitle2" color="text.secondary">
               Recent Conversations
             </Typography>
-            <IconButton size="small" onClick={loadConversationHistory}>
-              <Refresh fontSize="small" />
-            </IconButton>
+            <Box>
+              <IconButton size="small" onClick={loadConversationHistory} disabled={isLoadingHistory}>
+                {isLoadingHistory ? <CircularProgress size={16} /> : <Refresh fontSize="small" />}
+              </IconButton>
+              <Tooltip title="Close history">
+                <IconButton
+                  onClick={() => {setShowHistory(false)}}
+                  size="small" sx={{ ml: 1 }}
+                  disabled={conversationHistory.length === 0 || isLoadingHistory}
+                >
+                  <Clear />
+                </IconButton>
+              </Tooltip>
+            </Box>
           </Box>
           {conversationHistory.length > 0 ? (
             <List dense>
@@ -267,9 +317,15 @@ const ChatInterface = ({ user, isMobile }) => {
                 <ListItem key={index} sx={{ py: 0.5 }}>
                   <ListItemText
                     primary={
-                      <Typography variant="body2" noWrap sx={{ maxWidth: '100%' }}>
-                        {msg.content.length > 60 ? msg.content.substring(0, 60) + '...' : msg.content}
-                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1, maxWidth: '100%', flexDirection: isMobile ? 'column' : 'row' }}>
+                        <Typography variant="subtitle2" component="span" fontWeight="bold">
+                          {msg.role === 'user' ? 'You:' : 
+                          msg.role === 'error' ? 'Error' : 'Second Brain:'}
+                        </Typography>
+                        <Typography variant="body2" noWrap sx={{ maxWidth: '100%' }}>
+                          {msg.content.length > 60 ? msg.content.substring(0, 60) + '...' : msg.content}
+                        </Typography>
+                      </Box>
                     }
                     secondary={
                       <Typography variant="caption" color="text.secondary">
@@ -402,14 +458,30 @@ const ChatInterface = ({ user, isMobile }) => {
                           {message.content}
                         </Typography>
                         {message.sources && message.sources.length > 0 && (
-                          <Box sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                            <StorageRoundedIcon sx={{ fontSize: 16, opacity: 0.7 }} />
-                            <Typography variant="caption" color="text.secondary">
+                          <Box
+                            sx={{
+                              mt: 1,
+                              display: 'flex',
+                              alignItems: 'flex-start',
+                              gap: 0.5,
+                              maxWidth: '100%',
+                            }}
+                          >
+                            <StorageRoundedIcon sx={{ fontSize: 16, opacity: 0.7, mt: '2px' }} />
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                              sx={{
+                                wordBreak: 'break-word',
+                                overflowWrap: 'anywhere',
+                                flex: 1,
+                              }}
+                            >
                               Sources: {message.sources.join(', ')}
                             </Typography>
                             <IconButton
                               size="small"
-                              sx={{ ml: 'auto' }}
+                              sx={{ ml: 0.5, flexShrink: 0 }}
                               onClick={() => copyToClipboard(message.content)}
                             >
                               <ContentCopy fontSize="small" />
