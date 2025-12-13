@@ -1,5 +1,5 @@
 // src/components/FileUpload.js
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Box,
   Paper,
@@ -11,40 +11,68 @@ import {
   ListItemIcon,
   IconButton,
   LinearProgress,
-  Alert,
+  // Alert,
   Chip,
   Fade,
+  // Tooltip,
+  // Grid,
+  // Card,
+  // CardContent,
+  // CardActions,
+  // Dialog,
+  // DialogTitle,
+  // DialogContent,
+  // DialogActions,
+  // Collapse,
   Tooltip
 } from '@mui/material';
 import {
   Upload,
-//   InsertDriveFile,
   Delete,
   CheckCircle,
-  Error
+  Error,
+  Description,
+  PictureAsPdf,
+  Image,
+  InsertDriveFile,
+  // ExpandMore,
+  // ExpandLess
 } from '@mui/icons-material';
+import { useDropzone } from 'react-dropzone';
 import { secondBrainAPI } from '../services/api';
 import DataVisualizer from './DataVisualizer';
 
 const FileUpload = ({ onUploadSuccess, isMobile }) => {
   const [files, setFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
-  const [uploadResults, setUploadResults] = useState([]);
-  const [dragActive, setDragActive] = useState(false);
+  // const [uploadResults, setUploadResults] = useState([]);
+  // const [dragActive, setDragActive] = useState(false);
+  // const [showFileTypes, setShowFileTypes] = useState(false);
 
-  // FILE SELECT
-  const handleFileSelect = (e) => {
-    const selectedFiles = Array.from(e.target.files);
-    addFiles(selectedFiles);
-  };
+  const onDrop = useCallback((acceptedFiles) => {
+    addFiles(acceptedFiles);
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'application/pdf': ['.pdf'],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+      'text/plain': ['.txt'],
+      'image/*': ['.jpg', '.jpeg', '.png', '.gif'],
+      'application/json': ['.json'],
+      'text/csv': ['.csv']
+    },
+    maxSize: 50 * 1024 * 1024, // 50MB
+  });
 
   // DRAG & DROP HANDLERS
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setDragActive(false);
-    const droppedFiles = Array.from(e.dataTransfer.files);
-    addFiles(droppedFiles);
-  };
+  // const handleDrop = (e) => {
+  //   e.preventDefault();
+  //   setDragActive(false);
+  //   const droppedFiles = Array.from(e.dataTransfer.files);
+  //   addFiles(droppedFiles);
+  // };
 
   const addFiles = (selectedFiles) => {
     const newFiles = selectedFiles.map(file => ({
@@ -87,15 +115,17 @@ const FileUpload = ({ onUploadSuccess, isMobile }) => {
       setFiles([...files]); // Update progress
     }
 
-    setUploadResults(results);
+    // setUploadResults(results);
     setUploading(false);
     onUploadSuccess?.();
 
-    // Clear files after 5 seconds
-    setTimeout(() => {
-      setFiles([]);
-      setUploadResults([]);
-    }, 5000);
+    // Clear files after successful upload of 5 seconds
+    if (results.some(r => r.status === 'success')) {
+      setTimeout(() => {
+        setFiles([]);
+        // setUploadResults([]);
+      }, 5000);
+    }
   };
 
   const removeFile = (id) => {
@@ -105,17 +135,17 @@ const FileUpload = ({ onUploadSuccess, isMobile }) => {
   const getFileIcon = (fileName) => {
     const ext = fileName.split('.').pop()?.toLowerCase();
     const fileTypeIcons = {
-      pdf: '📄',
-      doc: '📝',
-      docx: '📝',
-      txt: '📃',
-      jpg: '🖼️',
-      jpeg: '🖼️',
-      png: '🖼️',
-      json: '📊',
-      csv: '📊'
+      pdf: <PictureAsPdf color="error" />,
+      doc: <Description color="primary" />,
+      docx: <Description color="primary" />,
+      txt: <InsertDriveFile color="action" />,
+      jpg: <Image color="success" />,
+      jpeg: <Image color="success" />,
+      png: <Image color="success" />,
+      json: <Description color="warning" />,
+      csv: <Description color="info" />
     };
-    return fileTypeIcons[ext] || '📁';
+    return fileTypeIcons[ext] || <InsertDriveFile />;
   };
 
   const getStatusIcon = (status) => {
@@ -127,7 +157,7 @@ const FileUpload = ({ onUploadSuccess, isMobile }) => {
       case 'uploading':
         return <LinearProgress sx={{ width: 24, borderRadius: '12px' }} />;
       default:
-        return <Upload color="disabled" />;
+        return null; // <Upload color="disabled" />
     }
   };
 
@@ -137,159 +167,273 @@ const FileUpload = ({ onUploadSuccess, isMobile }) => {
     return mb < 1 ? `${(bytes / 1024).toFixed(2)} KB` : `${mb.toFixed(2)} MB`;
   };
 
+  // const supportedFileTypes = [
+  //   { type: 'PDF', extensions: '.pdf', icon: <PictureAsPdf /> },
+  //   { type: 'Word', extensions: '.docx, .doc', icon: <Description /> },
+  //   { type: 'Text', extensions: '.txt', icon: <InsertDriveFile /> },
+  //   { type: 'Images', extensions: '.jpg, .jpeg, .png', icon: <Image /> },
+  //   { type: 'JSON', extensions: '.json', icon: <Description /> },
+  //   { type: 'CSV', extensions: '.csv', icon: <Description /> }
+  // ];
+
   return (
-    <Box>
     <Box>
       <Typography variant={isMobile ? 'h6' : 'h5'} gutterBottom>
         Upload Files to Your Second Brain
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      {/* <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
         Supported formats: PDF, DOCX, TXT, Images, JSON, CSV
-      </Typography>
+      </Typography> */}
+      
+      {/* <Grid container spacing={2}> */}
+        {/* Supported File Types */}
+        {/* <Grid item xs={12} md={6}>
+          <Card variant="outlined">
+            <CardContent>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                <Typography variant="h6">
+                  Supported Formats
+                </Typography>
+                <IconButton size="small" onClick={() => setShowFileTypes(!showFileTypes)}>
+                  {showFileTypes ? <ExpandLess /> : <ExpandMore />}
+                </IconButton>
+              </Box>
+              <Collapse in={showFileTypes}>
+                <Grid container spacing={1}>
+                  {supportedFileTypes.map((fileType) => (
+                    <Grid item xs={6} key={fileType.type}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1 }}>
+                        {fileType.icon}
+                        <Box>
+                          <Typography variant="body2" fontWeight="medium">
+                            {fileType.type}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {fileType.extensions}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Collapse>
+            </CardContent>
+          </Card>
+        </Grid> */}
 
+        {/* Upload Stats */}
+        {/* <Grid item xs={12} md={6}>
+          <Card variant="outlined">
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                Upload Stats
+              </Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Box>
+                  <Typography variant="h4" color="primary">
+                    {files.length}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Selected Files
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography variant="h4" color="success.main">
+                    {files.filter(f => f.status === 'success').length}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Successfully Uploaded
+                  </Typography>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid> */}
+      {/* </Grid> */}
+
+      {/* Drop Zone */}
       <Paper 
-        elevation={dragActive ? 6 : 2}
-        onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
-        onDragLeave={() => setDragActive(false)}
-        onDrop={handleDrop}
+        {...getRootProps()}
+        elevation={isDragActive ? 6 : 2}
+        // onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+        // onDragLeave={() => setDragActive(false)}
+        // onDrop={handleDrop}
         sx={{ 
-          p: 3, 
+          p: 4, 
           textAlign: 'center',
           border: '2px dashed',
-          borderColor: dragActive ? 'primary.main' : 'divider',
-          backgroundColor: dragActive ? 'primary.light' : 'action.hover',
+          borderColor: isDragActive ? 'primary.main' : 'divider',
+          backgroundColor: isDragActive ? 'primary.light' : 'action.hover',
           mb: 3,
-          transition: '0.3s',
-          borderRadius: 3
+          transition: 'all 0.3s',
+          borderRadius: 3,
+          cursor: 'pointer',
+          '&:hover': {
+            borderColor: 'primary.main',
+            backgroundColor: 'action.selected'
+          }
         }}
       >
-        <input
-          accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.json,.csv"
-          style={{ display: 'none' }}
-          id="file-upload"
-          multiple
-          type="file"
-          onChange={handleFileSelect}
-        />
-        <label htmlFor="file-upload">
-          <Button
-            variant="contained"
-            component="span"
-            startIcon={<Upload />}
-            size="large"
-            disabled={uploading}
-          >
-            Select Files
-          </Button>
-        </label>
-        <Typography mt={2} color="text.secondary">
-          Drag & drop files here or click to browse
+        <input {...getInputProps()} />
+        <Upload sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+        <Typography variant="h6" gutterBottom>
+          Drop files here or click to browse
         </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Max file size: 50MB • Supports PDF, DOCX, TXT, Images, JSON, CSV
+        </Typography>
+        <Button variant="contained" sx={{ mt: 2 }}>
+          Select Files
+        </Button>
       </Paper>
 
-      {/* FILE LIST */}
+      {/* File List */}
       {files.length > 0 && (
-      <Fade in={files.length > 0}>
-        <Paper sx={{ p: 2, mb: 3, borderRadius: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            Selected Files ({files.length})
-          </Typography>
-          <List>
-            {files.map((fileObj) => (
-              <ListItem
-                key={fileObj.id}
-                secondaryAction={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    {getStatusIcon(fileObj.status)}
-                    <IconButton
-                      edge="end"
-                      onClick={() => removeFile(fileObj.id)}
-                      disabled={uploading}
-                    >
-                      <Delete />
-                    </IconButton>
-                  </Box>
+        <Fade in={files.length > 0}>
+          <Paper sx={{ p: 2, mb: 3, borderRadius: 3 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6">
+                Selected Files ({files.length})
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                {/* <Button
+                  variant="contained"
+                  onClick={handleUpload}
+                  disabled={uploading || files.length === 0}
+                  startIcon={<Upload />}
+                >
+                  {uploading ? 'Uploading...' : `Upload ${files.length} Files`}
+                </Button> */}
+                <Button
+                  variant="outlined"
+                  onClick={() => setFiles([])}
+                  disabled={uploading}
+                  size="small"
+                >
+                  Clear All
+                </Button>
+              </Box>
+            </Box>
+            
+            <List>
+              {files.map((fileObj) => (
+                <ListItem
+                  key={fileObj.id}
+                  secondaryAction={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      {getStatusIcon(fileObj.status)}
+                      {fileObj.status === 'pending' && (
+                        <IconButton
+                          edge="end"
+                          onClick={() => removeFile(fileObj.id)}
+                          disabled={uploading}
+                          size="small"
+                        >
+                          <Delete />
+                        </IconButton>
+                      )}
+                    </Box>
+                  }
+                >
+                  <ListItemIcon>
+                    {getFileIcon(fileObj.file.name)}
+                  </ListItemIcon>
+                  <Tooltip title={fileObj.file.name} placement="top" arrow>
+                    <ListItemText
+                      primary={
+                        <Typography variant="body1" fontWeight="medium" noWrap>
+                          {fileObj.file.name}
+                        </Typography>
+                      }
+                      secondaryTypographyProps={{ component: "div" }}
+                      secondary={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 0.5 }}>
+                          <Typography variant="caption">
+                            {formatFileSize(fileObj.file.size)}
+                          </Typography>
+                          {/* {fileObj.progress > 0 && fileObj.status === 'uploading' && (
+                            <LinearProgress 
+                              variant="determinate" 
+                              value={fileObj.progress} 
+                              sx={{ width: 100 }}
+                            />
+                          )} */}
+                          {fileObj.status === 'success' && (
+                            <Chip label="Uploaded" size="small" color="success" />
+                          )}
+                          {fileObj.status === 'error' && (
+                            <Chip label="Failed" size="small" color="error" />
+                          )}
+                        </Box>
+                      }
+                    />
+                  </Tooltip>
+                </ListItem>
+              ))}
+            </List>
+
+            <Box sx={{ display: 'flex', gap: 2, mt: 2, width:'100%', justifyContent: 'flex-end' }}>
+              <Button
+                variant="contained"
+                onClick={handleUpload}
+                disabled={uploading || files.length === 0}
+                startIcon={<Upload />}
+                fullWidth
+              >
+                {uploading ? 'Uploading...' : `Upload ${files.length} Files`}
+              </Button>
+              {/* <Button
+                variant="outlined"
+                onClick={() => setFiles([])}
+                disabled={uploading}
+              >
+                Clear All
+              </Button> */}
+            </Box>
+          </Paper>
+        </Fade>
+      )}
+
+      {/* Upload Results */}
+      {/* {uploadResults.length > 0 && (
+        <Fade in={uploadResults.length > 0}>
+          <Paper elevation={1} sx={{ p: 2, borderRadius: 3, mb: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              Upload Results
+            </Typography>
+            {uploadResults.map((result, index) => (
+              <Alert
+                key={index}
+                severity={result.status === 'success' ? 'success' : 'error'}
+                sx={{ mb: 1 }}
+                action={
+                  result.status === 'success' && (
+                    <Chip
+                      label={`${result.result.chunks} chunks`}
+                      size="small"
+                      variant="outlined"
+                    />
+                  )
                 }
               >
-                <ListItemIcon>
-                  <Typography variant="h6">
-                    {getFileIcon(fileObj.file.name)}
-                  </Typography>
-                </ListItemIcon>
-                <Tooltip title={fileObj.file.name} placement="top" arrow>
-                  <ListItemText
-                    primary={fileObj.file.name}
-                    secondary= {formatFileSize(fileObj.file.size)}
-                    sx={{
-                      maxWidth: isMobile ? 160 : 340,   // ✅ Responsive width cap
-                      overflow: "hidden",
-                      whiteSpace: "nowrap",
-                      textOverflow: "ellipsis",
-                      
-                      "& .MuiListItemText-primary": {
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                        fontWeight: 500
-                      }
-                    }}
-                  />
-                </Tooltip>
-
-              </ListItem>
-            ))}
-          </List>
-
-          <Box sx={{ display: 'flex', gap: 2, mt: 2, width:'100%', justifyContent: 'flex-end' }}>
-            <Button
-              variant="contained"
-              onClick={handleUpload}
-              disabled={uploading || files.length === 0}
-              // fullWidth
-            >
-              {uploading ? 'Uploading...' : `Upload ${files.length} Files`}
-            </Button>
-            <Button
-              variant="outlined"
-              onClick={() => setFiles([])}
-              disabled={uploading}
-            >
-              Clear All
-            </Button>
-          </Box>
-        </Paper>
-      </Fade>)}
-
-      {uploadResults.length > 0 && (
-        <Paper elevation={1} sx={{ p: 2, borderRadius: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            Upload Results
-          </Typography>
-          {uploadResults.map((result, index) => (
-            <Alert
-              key={index}
-              severity={result.status === 'success' ? 'success' : 'error'}
-              sx={{ mb: 1 }}
-            >
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography>{result.filename}</Typography>
-                <Chip
-                  label={result.status === 'success' ? 'Success' : 'Failed'}
-                  color={result.status === 'success' ? 'success' : 'error'}
-                  size="small"
-                />
-              </Box>
-              {result.status === 'success' && result.result && (
-                <Typography variant="body2" sx={{ mt: 1 }}>
-                  Extracted {result.result.chunks} chunks of knowledge
+                <Typography variant="body2" fontWeight="medium">
+                  {result.filename}
                 </Typography>
-              )}
-            </Alert>
-          ))}
-        </Paper>
-      )}
-    </Box>
-      <DataVisualizer/>
+                {result.status === 'success' && (
+                  <Typography variant="caption" display="block">
+                    Successfully processed and added to knowledge base
+                  </Typography>
+                )}
+              </Alert>
+            ))}
+          </Paper>
+        </Fade>
+      )} */}
+
+      {/* Data Visualizer */}
+      <Box sx={{ mt: 4 }}>
+        <DataVisualizer />
+      </Box>
     </Box>
   );
 };

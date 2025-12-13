@@ -5,9 +5,15 @@ import {
   Alert,
   ToggleButtonGroup,
   ToggleButton,
-  // Paper,
   CircularProgress,
-  // Typography
+  SpeedDial,
+  SpeedDialAction,
+  SpeedDialIcon,
+  // Badge,
+  useTheme,
+  useMediaQuery,
+  // Typography,
+  Button
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import ChatInterface from './ChatInterface';
@@ -15,7 +21,18 @@ import FileUpload from './FileUpload';
 import MemoryManager from './MemoryManager';
 import DataVisualizer from './DataVisualizer';
 import { secondBrainAPI } from '../services/api';
-import { Storage, Chat, CloudUpload } from '@mui/icons-material'; // Psychology,
+import {
+  Chat,
+  CloudUpload,
+  // Storage,
+  // Psychology,
+  // Add,
+  Upload,
+  Memory as MemoryIcon,
+  // Description,
+  Dashboard,
+  Storage
+} from '@mui/icons-material';
 
 // Styled components
 // const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
@@ -59,6 +76,19 @@ const AnimatedToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
     zIndex: 1,
     border: 'none',
     transition: 'all 0.3s ease',
+    '&.Mui-selected': {
+      backgroundColor: 'transparent',
+      color: theme.palette.mode === 'dark' ? '#fff' : '#fff',
+      '&:hover': {
+        backgroundColor: 'transparent',
+      }
+    },
+    '&:not(.Mui-selected)': {
+      color: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)',
+      '&:hover': {
+        backgroundColor: 'rgba(0, 0, 0, 0.05)',
+      }
+    }
   }
 }));
 
@@ -68,6 +98,7 @@ const SliderThumb = styled(Box)(({ theme, position }) => ({
   left: position === 'first' ? '4px' : position === 'second' ? '24.5%' : '49%',
   width: '50%',
   height: 'calc(100% - 8px)',
+  // backgroundColor: theme.palette.primary.main,
   backgroundColor: theme.palette.mode === 'dark' 
     ? 'rgba(67, 97, 238, 0.7)' 
     : '#4361ee',
@@ -76,7 +107,7 @@ const SliderThumb = styled(Box)(({ theme, position }) => ({
   zIndex: 0,
 }));
 
-function SecondBrainApp({ user, isMobile, darkMode }) {
+function SecondBrainApp({ user, darkMode }) {
   const [activeTab, setActiveTab] = useState('chat');
   const [systemStatus, setSystemStatus] = useState({
     // documents: 0,
@@ -85,6 +116,9 @@ function SecondBrainApp({ user, isMobile, darkMode }) {
     loading: true,
     error: null
   });
+  const [showSpeedDial, setShowSpeedDial] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     checkSystemStatus();
@@ -140,7 +174,7 @@ function SecondBrainApp({ user, isMobile, darkMode }) {
   const renderContent = () => {
     if (systemStatus.loading) {
       return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
           <CircularProgress />
         </Box>
       );
@@ -168,17 +202,68 @@ function SecondBrainApp({ user, isMobile, darkMode }) {
     }
   };
 
+  const speedDialActions = [
+    { icon: <Upload />, name: 'Upload File', onClick: () => setActiveTab('upload') },
+    { icon: <MemoryIcon />, name: 'Add Memory', onClick: () => {
+      const memoryInput = prompt('Enter memory command:');
+      if (memoryInput) {
+        secondBrainAPI.addMemory(memoryInput).then(() => {
+          // loadTabStats();
+          setActiveTab('memories');
+        });
+      }
+    }},
+    { icon: <Dashboard />, name: 'View Stats', onClick: () => {
+      secondBrainAPI.getUserStats().then(stats => {
+        alert(`Documents: ${stats.vector_store?.unique_files || 0}\n` +
+              `Chunks: ${stats.vector_store?.total_chunks || 0}\n` +
+              `Memories: ${stats.memories?.total_memories || 0}`);
+      });
+    }},
+  ];
+
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box sx={{ width: '100%', position: 'relative', pb: isMobile ? 8 : 4 }}>
       {/* Welcome message */}
-      {/* <Paper elevation={0} sx={{ p: 3, mb: 3, bgcolor: 'primary.main', color: 'white' }}>
-        <Typography variant="h5" gutterBottom>
-          Welcome back, {user?.username}!
-        </Typography>
-        <Typography variant="body2">
-          Your Second Brain has {systemStatus.documents} documents and {systemStatus.memories} memories.
-        </Typography>
-      </Paper> */}
+      {/* <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        mb: 2,
+        p: 2,
+        borderRadius: 2,
+        bgcolor: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)'
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Psychology sx={{ color: 'primary.main' }} />
+          <Box>
+            <Typography variant="body2" color="text.secondary">
+              Welcome back, {user?.username || 'User'}!
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Your Second Brain is ready to assist you
+            </Typography>
+          </Box>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="h6" color="primary.main">
+              {stats.documents}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Files
+            </Typography>
+          </Box>
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="h6" color="secondary.main">
+              {stats.memories}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Memories
+            </Typography>
+          </Box>
+        </Box>
+      </Box> */}
 
       {/* Navigation Tabs */}
       {/* <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
@@ -307,9 +392,19 @@ function SecondBrainApp({ user, isMobile, darkMode }) {
           <SliderThumb position={activeTab === 'chat' ? 'first' : activeTab === 'upload' ? 'second' : 'third'} />
         </AnimatedToggleButtonGroup>
       </Box>
+
+      {/* Status Alert */}
       {!systemStatus.isConnected && !systemStatus.loading && (
-        <Alert severity="warning" sx={{ m: 2 }}>
-          Unable to connect to Second Brain backend. Please ensure the Python server is running.
+        <Alert 
+          severity="warning" 
+          sx={{ m: 2 }}
+          action={
+            <Button color="inherit" size="small" onClick={checkSystemStatus}>
+              Retry
+            </Button>
+          }
+        >
+          Unable to connect to Second Brain backend. Please ensure the server is running.
         </Alert>
       )}
 
@@ -321,6 +416,27 @@ function SecondBrainApp({ user, isMobile, darkMode }) {
       }}> */}
         {renderContent()}
       {/* </Paper> */}
+
+      {/* Speed Dial for Mobile */}
+      {isMobile && (
+        <SpeedDial
+          ariaLabel="Quick actions"
+          sx={{ position: 'fixed', bottom: 80, right: 16 }}
+          icon={<SpeedDialIcon />}
+          onOpen={() => setShowSpeedDial(true)}
+          onClose={() => setShowSpeedDial(false)}
+          open={showSpeedDial}
+        >
+          {speedDialActions.map((action) => (
+            <SpeedDialAction
+              key={action.name}
+              icon={action.icon}
+              tooltipTitle={action.name}
+              onClick={action.onClick}
+            />
+          ))}
+        </SpeedDial>
+      )}
     </Box>
   );
 }
