@@ -32,13 +32,119 @@ import {
   MoreVert,
   ContentCopy,
   AutoAwesome,
-  Refresh
+  Refresh,
+  Code
 } from '@mui/icons-material';
 import { secondBrainAPI } from '../services/api';
 import ArrowUpwardRoundedIcon from '@mui/icons-material/ArrowUpwardRounded';
 import StorageRoundedIcon from '@mui/icons-material/StorageRounded';
 import { formatDistanceToNow } from 'date-fns';
 import { useChat } from '../contexts/ChatContext';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
+
+// Helper function to detect code blocks in text
+const detectCodeBlocks = (text) => {
+  const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
+  const inlineCodeRegex = /`([^`]+)`/g;
+  const codeBlocks = [];
+  let lastIndex = 0;
+  let match;
+
+  // Process code blocks
+  while ((match = codeBlockRegex.exec(text)) !== null) {
+    // Add text before code block
+    if (match.index > lastIndex) {
+      codeBlocks.push({
+        type: 'text',
+        content: text.substring(lastIndex, match.index)
+      });
+    }
+
+    // Add code block
+    codeBlocks.push({
+      type: 'code',
+      language: match[1] || 'text',
+      content: match[2]
+    });
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  // Add remaining text
+  if (lastIndex < text.length) {
+    codeBlocks.push({
+      type: 'text',
+      content: text.substring(lastIndex)
+    });
+  }
+
+  // Process inline code in text blocks
+  const processedBlocks = codeBlocks.map(block => {
+    if (block.type === 'text') {
+      const parts = [];
+      let text = block.content;
+      let inlineLastIndex = 0;
+      let inlineMatch;
+
+      while ((inlineMatch = inlineCodeRegex.exec(text)) !== null) {
+        // Add text before inline code
+        if (inlineMatch.index > inlineLastIndex) {
+          parts.push({
+            type: 'text',
+            content: text.substring(inlineLastIndex, inlineMatch.index)
+          });
+        }
+
+        // Add inline code
+        parts.push({
+          type: 'inlineCode',
+          content: inlineMatch[1]
+        });
+
+        inlineLastIndex = inlineMatch.index + inlineMatch[0].length;
+      }
+
+      // Add remaining text
+      if (inlineLastIndex < text.length) {
+        parts.push({
+          type: 'text',
+          content: text.substring(inlineLastIndex)
+        });
+      }
+
+      return parts.length > 0 ? parts : [block];
+    }
+    return [block];
+  }).flat();
+
+  return processedBlocks;
+};
+
+// Helper to detect programming language from content
+const detectLanguage = (content) => {
+  const languagePatterns = {
+    python: /\b(def|import|from|class|print|lambda|yield)\b/,
+    javascript: /\b(const|let|var|function|=>|console\.|import\s)/,
+    java: /\b(public|private|class|static|void|System\.out\.)/,
+    cpp: /\b(#include|cout|cin|std::|namespace)\b/,
+    html: /<\w+/,
+    css: /[.#][\w-]+\s*{/,
+    sql: /\b(SELECT|FROM|WHERE|INSERT|UPDATE|DELETE)\b/i,
+    json: /{.*}/,
+    bash: /^\$|#!\/bin\/bash/
+  };
+
+  for (const [lang, pattern] of Object.entries(languagePatterns)) {
+    if (pattern.test(content)) {
+      return lang;
+    }
+  }
+  return 'text';
+};
 
 const ChatInterface = ({ user, isMobile }) => {
   const { 
@@ -60,6 +166,7 @@ const ChatInterface = ({ user, isMobile }) => {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const [showCodeTheme, setShowCodeTheme] = useState(true);
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -200,6 +307,15 @@ const ChatInterface = ({ user, isMobile }) => {
     showSnackbar('Copied to clipboard', 'success');
   };
 
+  const copyCodeToClipboard = (code) => {
+    navigator.clipboard.writeText(code);
+    showSnackbar('Code copied to clipboard', 'success');
+  };
+
+  const toggleCodeTheme = () => {
+    setShowCodeTheme(prev => !prev);
+  };
+
   const getConfidenceColor = (confidence) => {
     if (confidence > 0.8) return 'success';
     if (confidence > 0.5) return 'warning';
@@ -221,6 +337,104 @@ const ChatInterface = ({ user, isMobile }) => {
   const handleLoadHistory = async () => {
     await loadConversationHistory();
     setShowHistory(!showHistory);
+  };
+
+  const renderMessageContent = (content) => {
+    const blocks = detectCodeBlocks(content);
+    
+    return blocks.map((block, index) => {
+      if (block.type === 'code') {
+        const language = block.language === 'text' ? detectLanguage(block.content) : block.language;
+        return (
+          <Box key={index} sx={{ my: 2 }}>
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              bgcolor: showCodeTheme ? 'grey.900' : 'grey.200',
+              color: showCodeTheme ? 'grey.100' : 'grey.900',
+              p: 1,
+              borderTopLeftRadius: 4,
+              borderTopRightRadius: 4,
+              fontSize: '0.75rem'
+            }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Code fontSize="small" />
+                <Typography variant="caption" sx={{ textTransform: 'uppercase' }}>
+                  {language}
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Tooltip title="Toggle code theme">
+                <IconButton
+                  size="small"
+                  onClick={toggleCodeTheme}
+                  sx={{ color: 'inherit' }}
+                >
+                  {showCodeTheme ? (
+                    <Brightness7Icon fontSize="small" />
+                  ) : (
+                    <Brightness4Icon fontSize="small" />
+                  )}
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Copy code">
+                <IconButton
+                  size="small"
+                  onClick={() => copyCodeToClipboard(block.content)}
+                  sx={{ color: 'inherit' }}
+                >
+                  <ContentCopy fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Box>
+            </Box>
+            <SyntaxHighlighter
+              language={language}
+              style={showCodeTheme ? atomDark : prism}
+              customStyle={{
+                margin: 0,
+                borderRadius: '0 0 4px 4px',
+                fontSize: isMobile ? '0.75rem' : '0.875rem'
+              }}
+              showLineNumbers={block.content.split('\n').length > 5}
+              lineNumberStyle={{ minWidth: '3em' }}
+            >
+              {block.content}
+            </SyntaxHighlighter>
+          </Box>
+        );
+      } else if (block.type === 'inlineCode') {
+        return (
+          <code
+            key={index}
+            style={{
+              backgroundColor: 'rgba(0, 0, 0, 0.1)',
+              padding: '2px 4px',
+              borderRadius: 3,
+              fontFamily: 'monospace',
+              fontSize: '0.9em'
+            }}
+          >
+            {block.content}
+          </code>
+        );
+      } else {
+        return (
+          <Typography
+            key={index}
+            component="span"
+            sx={{
+              lineHeight: 1.6,
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word'
+            }}
+          >
+            {block.content}
+          </Typography>
+        );
+      }
+    });
   };
 
   return (
@@ -441,22 +655,16 @@ const ChatInterface = ({ user, isMobile }) => {
                     secondaryTypographyProps={{ component: "div" }}
                     secondary={
                       <Box>
-                        <Typography 
-                          variant="body1" 
+                        <Box 
                           sx={{ 
                             mb: 1,
-                            lineHeight: 1.5,
-                            // textAlign: 'justify',
-                            whiteSpace: "pre-wrap", // Retain line breaks and tabs
-                            wordWrap: "break-word", // Handle long words gracefully
                             p: 1,
                             borderRadius: 1,
-                            // border: "1px solid #ddd",
                             bgcolor: message.role === 'user' ? 'action.hover' : 'transparent'
                           }}
                         >
-                          {message.content}
-                        </Typography>
+                          {renderMessageContent(message.content)}
+                        </Box>
                         {message.sources && message.sources.length > 0 && (
                           <Box
                             sx={{
