@@ -20,7 +20,8 @@ import {
   MenuItem,
   Tooltip,
   Alert,
-  Snackbar
+  Snackbar,
+  Collapse
 } from '@mui/material';
 import {
   SmartToy,
@@ -33,7 +34,9 @@ import {
   ContentCopy,
   AutoAwesome,
   Refresh,
-  Code
+  Code,
+  KeyboardArrowDown,
+  KeyboardArrowUp,
 } from '@mui/icons-material';
 import { secondBrainAPI } from '../services/api';
 import ArrowUpwardRoundedIcon from '@mui/icons-material/ArrowUpwardRounded';
@@ -41,8 +44,8 @@ import StorageRoundedIcon from '@mui/icons-material/StorageRounded';
 import { formatDistanceToNow } from 'date-fns';
 import { useChat } from '../contexts/ChatContext';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
+// import { atomDark, vs } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { prism, vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 
@@ -167,6 +170,7 @@ const ChatInterface = ({ user, isMobile }) => {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const [showCodeTheme, setShowCodeTheme] = useState(true);
+  const [showCodePreview, setShowCodePreview] = useState({});
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -387,21 +391,37 @@ const ChatInterface = ({ user, isMobile }) => {
                   <ContentCopy fontSize="small" />
                 </IconButton>
               </Tooltip>
+              <Tooltip title={showCodePreview[block.blockId] ? "Collapse" : "Expand"}>
+                <IconButton
+                  size="small"
+                  sx={{ color: 'inherit' }}
+                  onClick={() => setShowCodePreview(prev => ({
+                    ...prev,
+                    [block.blockId]: !prev[block.blockId]
+                  }))}
+                >
+                  {showCodePreview[block.blockId] ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                </IconButton>
+              </Tooltip>
             </Box>
             </Box>
-            <SyntaxHighlighter
-              language={language}
-              style={showCodeTheme ? atomDark : prism}
-              customStyle={{
-                margin: 0,
-                borderRadius: '0 0 4px 4px',
-                fontSize: isMobile ? '0.75rem' : '0.875rem'
-              }}
-              showLineNumbers={block.content.split('\n').length > 5}
-              lineNumberStyle={{ minWidth: '3em' }}
-            >
-              {block.content}
-            </SyntaxHighlighter>
+            <Collapse in={showCodePreview[block.blockId] !== false}>
+              <SyntaxHighlighter
+                language={language}
+                style={showCodeTheme ? vscDarkPlus : prism}
+                customStyle={{
+                  margin: 0,
+                  borderRadius: '0 0 4px 4px',
+                  fontSize: isMobile ? '0.75rem' : '0.875rem',
+                  // maxHeight: '400px',
+                  // overflow: 'auto'
+                }}
+                showLineNumbers={block.content.split('\n').length > 5}
+                lineNumberStyle={{ minWidth: '3em' }}
+              >
+                {block.content}
+              </SyntaxHighlighter>
+            </Collapse>
           </Box>
         );
       } else if (block.type === 'inlineCode') {
