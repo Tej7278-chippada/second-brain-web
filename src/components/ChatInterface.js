@@ -44,7 +44,7 @@ import StorageRoundedIcon from '@mui/icons-material/StorageRounded';
 import { formatDistanceToNow } from 'date-fns';
 import { useChat } from '../contexts/ChatContext';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-// import { atomDark, vs } from 'react-syntax-highlighter/dist/esm/styles/prism';
+// import { atomDark, vs, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { prism, vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
@@ -343,6 +343,28 @@ const ChatInterface = ({ user, isMobile }) => {
     setShowHistory(!showHistory);
   };
 
+  // const enhancedDarkTheme = {
+  //   ...vscDarkPlus,
+  //   'pre[class*="language-"]': {
+  //     ...vscDarkPlus['pre[class*="language-"]'],
+  //     background: '#0f172a', // slate-900 (VS Code-like)
+  //     fontFamily: `'JetBrains Mono', 'Fira Code', monospace`
+  //   },
+  //   'code[class*="language-"]': {
+  //     ...vscDarkPlus['code[class*="language-"]'],
+  //     color: '#e5e7eb'
+  //   }
+  // };
+
+  // const enhancedLightTheme = {
+  //   ...oneLight,
+  //   'pre[class*="language-"]': {
+  //     ...oneLight['pre[class*="language-"]'],
+  //     background: '#f8fafc',
+  //     fontFamily: `'JetBrains Mono', 'Fira Code', monospace`
+  //   }
+  // };
+
   const renderMessageContent = (content) => {
     const blocks = detectCodeBlocks(content);
     
@@ -432,7 +454,7 @@ const ChatInterface = ({ user, isMobile }) => {
               backgroundColor: 'rgba(0, 0, 0, 0.1)',
               padding: '2px 4px',
               borderRadius: 3,
-              fontFamily: 'monospace',
+              fontFamily: `'JetBrains Mono', monospace`,
               fontSize: '0.9em'
             }}
           >

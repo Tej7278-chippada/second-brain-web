@@ -1,7 +1,7 @@
 // src/components/ProtectedRoute.js
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { Box, CircularProgress, Alert, Button } from '@mui/material';
+import { Box, CircularProgress } from '@mui/material';
 import { authServices } from '../services/api';
 
 const ProtectedRoute = ({ children, isAuthenticated: initialAuth }) => {
@@ -40,10 +40,10 @@ const ProtectedRoute = ({ children, isAuthenticated: initialAuth }) => {
     }
   }, [initialAuth]);
 
-  const handleRetry = () => {
-    setAuthStatus({ loading: true, isAuthenticated: false, error: null });
-    window.location.reload();
-  };
+  // const handleRetry = () => {
+  //   setAuthStatus({ loading: true, isAuthenticated: false, error: null });
+  //   window.location.reload();
+  // };
 
   if (authStatus.loading) {
     return (
@@ -54,26 +54,7 @@ const ProtectedRoute = ({ children, isAuthenticated: initialAuth }) => {
   }
 
   if (!authStatus.isAuthenticated) {
-    // Show error message before redirecting
-    return (
-      <Box sx={{ p: 3, maxWidth: 400, margin: '100px auto' }}>
-        <Alert 
-          severity="error" 
-          action={
-            <Button color="inherit" size="small" onClick={handleRetry}>
-              Retry
-            </Button>
-          }
-        >
-          {authStatus.error || 'Authentication required'}
-        </Alert>
-        {/* Auto-redirect after showing message */}
-        {setTimeout(() => {
-          window.location.href = '/login';
-        }, 2000)}
-        <Navigate to="/login" replace />
-      </Box>
-    );
+    return <Navigate to="/login" replace />;
   }
 
   return children;

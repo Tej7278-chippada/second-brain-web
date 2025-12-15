@@ -41,10 +41,10 @@ api.interceptors.response.use(
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
       
-      // Redirect to login page
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login';
-      }
+      // // Redirect to login page
+      // if (window.location.pathname !== '/login') {
+      //   window.location.href = '/login';
+      // }
     }
     
     // Handle network errors

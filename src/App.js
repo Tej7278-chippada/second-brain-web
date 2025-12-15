@@ -71,7 +71,7 @@ function AppContent() {
     localStorage.removeItem('user');
     setIsAuthenticated(false);
     setUser(null);
-    navigate('/login');
+    // navigate('/login');
     // console.log('User logged out');
   };
 
