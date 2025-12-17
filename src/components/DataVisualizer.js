@@ -1,5 +1,5 @@
 // src/components/DataVisualizer.js
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Box,
   Paper,
@@ -56,7 +56,7 @@ import {
 import { secondBrainAPI } from '../services/api';
 import { formatDistanceToNow } from 'date-fns';
 
-const DataVisualizer = () => {
+const DataVisualizer = ({ uploadedDocuments = [] }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [documents, setDocuments] = useState([]);
@@ -77,6 +77,73 @@ const DataVisualizer = () => {
   useEffect(() => {
     loadDocuments();
   }, []);
+
+  // to track processed uploaded documents
+  const processedUploadedDocsRef = useRef(new Set());
+
+  useEffect(() => {
+    if (uploadedDocuments && uploadedDocuments.length > 0) {
+      // Filter out already processed documents
+      const newUploadedDocs = uploadedDocuments.filter(doc => 
+        !processedUploadedDocsRef.current.has(doc.file_name)
+      );
+      
+      if (newUploadedDocs.length === 0) return;
+      
+      // Mark these as processed
+      newUploadedDocs.forEach(doc => {
+        processedUploadedDocsRef.current.add(doc.file_name);
+      });
+      
+      // Calculate total chunks from newly uploaded documents
+      const totalNewChunks = newUploadedDocs.reduce((sum, doc) => {
+        return sum + (doc.total_chunks || 1);
+      }, 0);
+      
+      // Update documents state
+      setDocuments(prevDocs => {
+        const mergedDocuments = [...prevDocs];
+        
+        // Remove duplicates and add new documents
+        newUploadedDocs.forEach(newDoc => {
+          const existingIndex = mergedDocuments.findIndex(
+            doc => doc.file_name === newDoc.file_name
+          );
+          
+          if (existingIndex !== -1) {
+            // Update existing document
+            mergedDocuments[existingIndex] = {
+              ...mergedDocuments[existingIndex],
+              ...newDoc,
+              ingestion_time: new Date().toISOString()
+            };
+          } else {
+            // Add new document
+            mergedDocuments.push(newDoc);
+          }
+        });
+        
+        return mergedDocuments;
+      });
+      
+      // Update stats state
+      setStats(prevStats => {
+        const newStats = {
+          totalChunks: Math.max(0, prevStats.totalChunks + totalNewChunks),
+          totalFiles: prevStats.totalFiles + newUploadedDocs.length,
+          byType: { ...prevStats.byType }
+        };
+        
+        // Update file type counts
+        newUploadedDocs.forEach(doc => {
+          const type = doc.file_type || 'Unknown';
+          newStats.byType[type] = (newStats.byType[type] || 0) + 1;
+        });
+        
+        return newStats;
+      });
+    }
+  }, [uploadedDocuments]);
 
   // useEffect(() => {
   //   filterAndSortDocuments();
@@ -154,7 +221,29 @@ const DataVisualizer = () => {
   const handleDeleteDocument = async (filename) => {
     try {
       await secondBrainAPI.deleteDocument(filename);
-      await loadDocuments();
+      // await loadDocuments();
+
+      // Update documents locally
+      const updatedDocuments = documents.filter(doc => doc.file_name !== filename);
+      setDocuments(updatedDocuments);
+      
+      // Update statistics
+      const deletedDoc = documents.find(doc => doc.file_name === filename);
+      const deletedChunks = deletedDoc?.total_chunks || 0;
+      
+      const newStats = {
+        totalChunks: Math.max(0, stats.totalChunks - deletedChunks),
+        totalFiles: Math.max(0, stats.totalFiles - 1),
+        byType: {}
+      };
+      
+      updatedDocuments.forEach(doc => {
+        const type = doc.file_type || 'Unknown';
+        newStats.byType[type] = (newStats.byType[type] || 0) + 1;
+      });
+      
+      setStats(newStats);
+      
       setDeleteDialog(null);
     } catch (error) {
       console.error('Error deleting document:', error);
@@ -258,7 +347,7 @@ const DataVisualizer = () => {
 
       {/* Stats Cards */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={6} md={3}>
+        <Grid size={{xs: 4, md: 4}}>
           <Card variant="outlined">
             <CardContent sx={{ textAlign: 'center' }}>
               <Typography variant="h5" color="primary.main">
@@ -270,7 +359,7 @@ const DataVisualizer = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={6} md={3}>
+        <Grid size={{xs: 4, md: 4}}>
           <Card variant="outlined">
             <CardContent sx={{ textAlign: 'center' }}>
               <Typography variant="h5" color="success.main">
@@ -282,7 +371,7 @@ const DataVisualizer = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={6} md={3}>
+        <Grid size={{xs: 4, md: 4}}>
           <Card variant="outlined">
             <CardContent sx={{ textAlign: 'center' }}>
               <Typography variant="h5" color="warning.main">
@@ -294,7 +383,7 @@ const DataVisualizer = () => {
             </CardContent>
           </Card>
         </Grid>
-        {/* <Grid item xs={6} md={3}>
+        {/* <Grid size={{xs: 4, md: 4}}>
           <Card variant="outlined" sx={{ height: '100%' }}>
             <CardContent sx={{ textAlign: 'center' }}>
               <Button

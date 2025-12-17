@@ -45,6 +45,7 @@ import DataVisualizer from './DataVisualizer';
 const FileUpload = ({ onUploadSuccess, isMobile }) => {
   const [files, setFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
+  const [uploadedDocuments, setUploadedDocuments] = useState([]);
   // const [uploadResults, setUploadResults] = useState([]);
   // const [dragActive, setDragActive] = useState(false);
   // const [showFileTypes, setShowFileTypes] = useState(false);
@@ -89,6 +90,7 @@ const FileUpload = ({ onUploadSuccess, isMobile }) => {
 
     setUploading(true);
     const results = [];
+    const newUploadedDocuments = []; // Create a local array
 
     for (let fileObj of files) {
       try {
@@ -99,6 +101,15 @@ const FileUpload = ({ onUploadSuccess, isMobile }) => {
         const result = await secondBrainAPI.uploadFile(fileObj.file);
         fileObj.progress = 100;
         fileObj.status = 'success';
+        // Store uploaded document info in local array
+        newUploadedDocuments.push({
+          file_name: result.filename,
+          file_type: `.${fileObj.file.name.split('.').pop()?.toLowerCase()}`,
+          file_size: fileObj.file.size,
+          ingestion_time: new Date().toISOString(),
+          content_preview: `Uploaded file: ${fileObj.file.name}`,
+          total_chunks: result.chunks || 1
+        });
         results.push({
           filename: fileObj.file.name,
           status: 'success',
@@ -115,9 +126,14 @@ const FileUpload = ({ onUploadSuccess, isMobile }) => {
       setFiles([...files]); // Update progress
     }
 
+    // Update uploadedDocuments state once
+    if (newUploadedDocuments.length > 0) {
+      setUploadedDocuments(prev => [...prev, ...newUploadedDocuments]);
+    }
+
     // setUploadResults(results);
     setUploading(false);
-    onUploadSuccess?.();
+    onUploadSuccess?.(newUploadedDocuments); // Pass new uploaded documents to parent
 
     // Clear files after successful upload of 5 seconds
     if (results.some(r => r.status === 'success')) {
@@ -432,7 +448,7 @@ const FileUpload = ({ onUploadSuccess, isMobile }) => {
 
       {/* Data Visualizer */}
       <Box sx={{ mt: 4 }}>
-        <DataVisualizer />
+        <DataVisualizer uploadedDocuments={uploadedDocuments} />
       </Box>
     </Box>
   );

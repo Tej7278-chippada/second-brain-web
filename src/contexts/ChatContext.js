@@ -103,6 +103,7 @@ export const ChatProvider = ({ children, user }) => {
   }, [HISTORY_STORAGE_KEY]);
 
   const loadConversationHistory = useCallback(async () => {
+    if (!user?.id) return;
     setIsLoadingHistory(true);
     try {
       const data = await secondBrainAPI.getConversationHistory();
@@ -114,7 +115,7 @@ export const ChatProvider = ({ children, user }) => {
     } finally {
       setIsLoadingHistory(false);
     }
-  }, [saveHistoryToStorage]);
+  }, [saveHistoryToStorage, user?.id]);
 
   const addToConversationHistory = useCallback((userMessage, assistantMessage) => {
     setConversationHistory(prev => [

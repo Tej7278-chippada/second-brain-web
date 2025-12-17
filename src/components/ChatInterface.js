@@ -498,13 +498,15 @@ const ChatInterface = ({ user, isMobile }) => {
         
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Tooltip title="Clear chat history">
-            <IconButton
-              onClick={clearChat}
-              size="small"
-              disabled={messages.length === 0}
-            >
-              <Clear />
-            </IconButton>
+            <span>
+              <IconButton
+                onClick={clearChat}
+                size="small"
+                disabled={messages.length === 0}
+              >
+                <Clear />
+              </IconButton>
+            </span>
           </Tooltip>
           
           <Tooltip title="More options">
@@ -557,13 +559,15 @@ const ChatInterface = ({ user, isMobile }) => {
                 {isLoadingHistory ? <CircularProgress size={16} /> : <Refresh fontSize="small" />}
               </IconButton>
               <Tooltip title="Close history">
-                <IconButton
-                  onClick={() => {setShowHistory(false)}}
-                  size="small" sx={{ ml: 1 }}
-                  disabled={conversationHistory.length === 0 || isLoadingHistory}
-                >
-                  <Clear />
-                </IconButton>
+                <span>
+                  <IconButton
+                    onClick={() => {setShowHistory(false)}}
+                    size="small" sx={{ ml: 1 }}
+                    disabled={conversationHistory.length === 0 || isLoadingHistory}
+                  >
+                    <Clear />
+                  </IconButton>
+                </span>
               </Tooltip>
             </Box>
           </Box>
