@@ -51,8 +51,10 @@ const FileUpload = ({ onUploadSuccess, isMobile }) => {
   // const [showFileTypes, setShowFileTypes] = useState(false);
 
   const onDrop = useCallback((acceptedFiles) => {
-    addFiles(acceptedFiles);
-  }, []);
+    if (!uploading && !files.some(f => f.status === 'success')) {
+      addFiles(acceptedFiles);
+    }
+  }, [uploading, files]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -65,6 +67,8 @@ const FileUpload = ({ onUploadSuccess, isMobile }) => {
       'text/csv': ['.csv']
     },
     maxSize: 50 * 1024 * 1024, // 50MB
+    noClick: uploading || files.some(f => f.status === 'success'), // Disable click
+    noKeyboard: uploading || files.some(f => f.status === 'success'), // Disable keyboard
   });
 
   // DRAG & DROP HANDLERS
@@ -278,27 +282,28 @@ const FileUpload = ({ onUploadSuccess, isMobile }) => {
           p: 4, 
           textAlign: 'center',
           border: '2px dashed',
-          borderColor: isDragActive ? 'primary.main' : 'divider',
-          backgroundColor: isDragActive ? 'primary.light' : 'action.hover',
+          borderColor: isDragActive ? 'primary.main' : (uploading || files.some(f => f.status === 'success')) ? 'action.disabled' : 'divider',
+          backgroundColor: isDragActive ? 'primary.light' : (uploading || files.some(f => f.status === 'success')) ? 'action.disabledBackground' : 'action.hover',
           mb: 3,
           transition: 'all 0.3s',
           borderRadius: 3,
-          cursor: 'pointer',
+          cursor: (uploading || files.some(f => f.status === 'success')) ? 'not-allowed' : 'pointer',
           '&:hover': {
-            borderColor: 'primary.main',
-            backgroundColor: 'action.selected'
-          }
+            borderColor: (uploading || files.some(f => f.status === 'success')) ? 'action.disabled' : 'primary.main',
+            backgroundColor: (uploading || files.some(f => f.status === 'success')) ? 'action.disabledBackground' : 'action.selected'
+          },
+          opacity: (uploading || files.some(f => f.status === 'success')) ? 0.6 : 1
         }}
       >
-        <input {...getInputProps()} />
-        <Upload sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+        <input {...getInputProps()} disabled={uploading || files.some(f => f.status === 'success')} />
+        <Upload sx={{ fontSize: 48, color: (uploading || files.some(f => f.status === 'success')) ? 'action.disabled' : 'primary.main', mb: 2 }} />
         <Typography variant="h6" gutterBottom>
           Drop files here or click to browse
         </Typography>
         <Typography variant="body2" color="text.secondary">
           Max file size: 50MB • Supports PDF, DOCX, TXT, Images, JSON, CSV
         </Typography>
-        <Button variant="contained" sx={{ mt: 2 }}>
+        <Button variant="contained" sx={{ mt: 2 }} disabled={uploading || files.some(f => f.status === 'success')}>
           Select Files
         </Button>
       </Paper>
@@ -323,7 +328,7 @@ const FileUpload = ({ onUploadSuccess, isMobile }) => {
                 <Button
                   variant="outlined"
                   onClick={() => setFiles([])}
-                  disabled={uploading}
+                  disabled={uploading || files.some(f => f.status === 'success')}
                   size="small"
                 >
                   Clear All
@@ -392,11 +397,13 @@ const FileUpload = ({ onUploadSuccess, isMobile }) => {
               <Button
                 variant="contained"
                 onClick={handleUpload}
-                disabled={uploading || files.length === 0}
+                disabled={uploading || files.length === 0 || files.some(f => f.status === 'success')}
                 startIcon={<Upload />}
                 fullWidth
               >
-                {uploading ? 'Uploading...' : `Upload ${files.length} Files`}
+                {uploading ? 'Uploading...' : 
+                  files.some(f => f.status === 'success') ? 'Upload Complete' : 
+                  `Upload ${files.length} Files`}
               </Button>
               {/* <Button
                 variant="outlined"
