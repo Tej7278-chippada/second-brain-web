@@ -153,7 +153,62 @@ export const secondBrainAPI = {
       return response.data;
     } catch (error) {
       console.error('File upload error:', error);
-      throw error;
+      
+      // Extract user-friendly error message
+      let userMessage = 'Upload failed. Please try again.';
+      let detailedError = 'Unknown error';
+      
+      if (error.response) {
+        // Server responded with error
+        const status = error.response.status;
+        const serverError = error.response.data?.error || error.response.data?.message || error.response.statusText;
+        detailedError = serverError;
+        
+        // Map HTTP status codes to user-friendly messages
+        switch (status) {
+          case 400:
+            if (serverError.includes('encrypted') || serverError.includes('Encrypted') || 
+                serverError.includes('password') || serverError.includes('Password')) {
+              userMessage = 'File is password-protected or encrypted';
+            } else if (serverError.includes('corrupted') || serverError.includes('corrupt')) {
+              userMessage = 'File appears to be corrupted';
+            } else if (serverError.includes('No text') || serverError.includes('empty content') || 
+                      serverError.includes('extractable')) {
+              userMessage = 'No readable text found in file';
+            } else if (serverError.includes('Unsupported')) {
+              userMessage = 'File format is not supported';
+            } else {
+              userMessage = serverError || 'Invalid file format or content';
+            }
+            break;
+          case 413:
+            userMessage = 'File too large (maximum 50MB)';
+            break;
+          case 401:
+            userMessage = 'Please login again to upload files';
+            break;
+          case 500:
+            userMessage = 'Server error. Please try again later.';
+            break;
+          default:
+            userMessage = serverError || `Upload failed (Error ${status})`;
+        }
+      } else if (error.request) {
+        // Network error
+        userMessage = 'Network error. Please check your internet connection.';
+        detailedError = 'Network request failed';
+      } else if (error.message) {
+        // Axios setup error
+        userMessage = 'Upload failed. Please try again.';
+        detailedError = error.message;
+      }
+      
+      // Create a proper error object with user-friendly message
+      const userError = new Error(userMessage);
+      userError.detailedError = detailedError;
+      userError.originalError = error;
+      
+      throw userError;
     }
   },
 

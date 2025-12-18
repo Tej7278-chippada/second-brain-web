@@ -46,6 +46,7 @@ const FileUpload = ({ onUploadSuccess, isMobile }) => {
   const [files, setFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [uploadedDocuments, setUploadedDocuments] = useState([]);
+  const [openErrorFileId, setOpenErrorFileId] = useState(null);
   // const [uploadResults, setUploadResults] = useState([]);
   // const [dragActive, setDragActive] = useState(false);
   // const [showFileTypes, setShowFileTypes] = useState(false);
@@ -103,6 +104,12 @@ const FileUpload = ({ onUploadSuccess, isMobile }) => {
         setFiles([...files]); // Trigger re-render
 
         const result = await secondBrainAPI.uploadFile(fileObj.file);
+        
+        // Check if upload was actually successful
+        if (!result.success) {
+          throw new Error(result.error || 'Upload failed');
+        }
+        
         fileObj.progress = 100;
         fileObj.status = 'success';
         // Store uploaded document info in local array
@@ -121,28 +128,39 @@ const FileUpload = ({ onUploadSuccess, isMobile }) => {
         });
       } catch (error) {
         fileObj.status = 'error';
+        fileObj.errorMessage = error.message || 'Upload failed'; // Use the user-friendly error message
+        fileObj.errorDetails = error.detailedError || error.toString(); // Store detailed error for tooltip
+        fileObj.originalError = error;
+        
         results.push({
           filename: fileObj.file.name,
           status: 'error',
-          error: error.message
+          error: fileObj.errorMessage
         });
+        
+        // Log detailed error to console for debugging
+        // console.error(`Upload failed for ${fileObj.file.name}:`, error.message);
+        // if (error.detailedError && error.detailedError !== error.message) {
+        //   console.error('Detailed error:', error.detailedError);
+        // }
       }
       setFiles([...files]); // Update progress
     }
 
-    // Update uploadedDocuments state once
-    if (newUploadedDocuments.length > 0) {
+    // Only add successfully uploaded documents
+    const successfulUploads = results.filter(r => r.status === 'success');
+    if (successfulUploads.length > 0 && newUploadedDocuments.length > 0) {
       setUploadedDocuments(prev => [...prev, ...newUploadedDocuments]);
+      onUploadSuccess?.(newUploadedDocuments); // Pass new uploaded documents to parent
     }
 
     // setUploadResults(results);
     setUploading(false);
-    onUploadSuccess?.(newUploadedDocuments); // Pass new uploaded documents to parent
 
-    // Clear files after successful upload of 5 seconds
-    if (results.some(r => r.status === 'success')) {
+    // Clear only successful files after 5 seconds, keep error files visible
+    if (successfulUploads.length > 0) {
       setTimeout(() => {
-        setFiles([]);
+        setFiles(prev => prev.filter(file => file.status !== 'success'));
         // setUploadResults([]);
       }, 5000);
     }
@@ -168,12 +186,24 @@ const FileUpload = ({ onUploadSuccess, isMobile }) => {
     return fileTypeIcons[ext] || <InsertDriveFile />;
   };
 
-  const getStatusIcon = (status) => {
-    switch (status) {
+  const getStatusIcon = (fileObj) => {
+    switch (fileObj.status) {
       case 'success':
         return <CheckCircle color="success" />;
       case 'error':
-        return <Error color="error" />;
+      return (
+        <IconButton
+          size="small"
+          color="error"
+          onClick={() =>
+            setOpenErrorFileId(prev =>
+              prev === fileObj.id ? null : fileObj.id
+            )
+          }
+        >
+          <Error />
+        </IconButton>
+      );
       case 'uploading':
         return <LinearProgress sx={{ width: 24, borderRadius: '12px' }} />;
       default:
@@ -185,6 +215,102 @@ const FileUpload = ({ onUploadSuccess, isMobile }) => {
     if (!bytes) return 'Unknown';
     const mb = bytes / 1024 / 1024;
     return mb < 1 ? `${(bytes / 1024).toFixed(2)} KB` : `${mb.toFixed(2)} MB`;
+  };
+
+  // function to get file-specific error suggestions
+  const getFileErrorSuggestions = (fileName, errorMessage) => {
+    const fileExt = fileName.split('.').pop()?.toLowerCase();
+    let suggestions = [];
+    
+    if (errorMessage.includes('password') || errorMessage.includes('encrypted')) {
+      suggestions = [
+        'Remove password protection from the file',
+        'Save a copy without encryption',
+        'Convert to a different format'
+      ];
+    } else if (errorMessage.includes('corrupted')) {
+      suggestions = [
+        'Try opening the file in its native application',
+        'Download the file again from source',
+        'Check if file transfers were interrupted'
+      ];
+    } else if (errorMessage.includes('No readable text') || errorMessage.includes('OCR')) {
+      if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff'].includes(fileExt)) {
+        suggestions = [
+          'Ensure image is clear and text is readable',
+          'Try converting to PDF with text layer',
+          'Use higher resolution image'
+        ];
+      } else {
+        suggestions = [
+          'File may contain only images/scans without text',
+          'Try saving as a different format',
+          'Check if file is genuinely a text document'
+        ];
+      }
+    } else if (errorMessage.includes('Unsupported')) {
+      suggestions = [
+        'Convert to supported format: PDF, DOCX, TXT, JPG, PNG, JSON, CSV',
+        'Check file extension matches actual content',
+        'Use standard file formats'
+      ];
+    } else if (errorMessage.includes('too large')) {
+      suggestions = [
+        'Compress the file if possible',
+        'Split large files into smaller parts',
+        'Maximum file size is 50MB'
+      ];
+    }
+    
+    return suggestions;
+  };
+
+  // Update the renderErrorDetails function
+  const renderErrorDetails = (fileObj) => {
+    if (!fileObj.errorMessage && !fileObj.errorDetails) return null;
+    
+    const suggestions = getFileErrorSuggestions(fileObj.file.name, fileObj.errorMessage);
+    
+    return (
+      <Box sx={{ mt: 1, p: 1.5, borderRadius: 1, borderLeft: '4px solid', borderColor: 'error.main' }}> {/* bgcolor: 'error.light', */}
+        <Typography variant="caption" color="error.dark" fontWeight="bold" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <Error fontSize="small" /> Upload Failed
+        </Typography>
+        <Typography variant="body2" color="error.dark" sx={{ display: 'block', mt: 0.5, fontWeight: 'medium' }}>
+          {fileObj.errorMessage}
+        </Typography>
+        {fileObj.errorDetails && fileObj.errorDetails !== fileObj.errorMessage && (
+          <Typography variant="caption" color="error.dark" sx={{ display: 'block', mt: 0.5, fontStyle: 'italic' }}>
+            {fileObj.errorDetails}
+          </Typography>
+        )}
+        
+        {suggestions.length > 0 && (
+          <Box sx={{ mt: 1.5 }}>
+            <Typography variant="caption" color="error.dark" fontWeight="bold">
+              💡 Suggestions:
+            </Typography>
+            <Box component="ul" sx={{ mt: 0.5, pl: 2, mb: 0 }}>
+              {suggestions.map((suggestion, index) => (
+                <Typography 
+                  key={index} 
+                  component="li" 
+                  variant="caption" 
+                  color="error.dark"
+                  sx={{ mb: 0.5 }}
+                >
+                  {suggestion}
+                </Typography>
+              ))}
+            </Box>
+          </Box>
+        )}
+        
+        {/* <Typography variant="caption" color="error.dark" sx={{ display: 'block', mt: 1, fontSize: '0.7rem' }}>
+          Click the red error icon to retry upload
+        </Typography> */}
+      </Box>
+    );
   };
 
   // const supportedFileTypes = [
@@ -342,12 +468,21 @@ const FileUpload = ({ onUploadSuccess, isMobile }) => {
                   key={fileObj.id}
                   secondaryAction={
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      {getStatusIcon(fileObj.status)}
+                      {getStatusIcon(fileObj)}
                       {fileObj.status === 'pending' && (
                         <IconButton
                           edge="end"
                           onClick={() => removeFile(fileObj.id)}
                           disabled={uploading}
+                          size="small"
+                        >
+                          <Delete />
+                        </IconButton>
+                      )}
+                      {fileObj.status === 'error' && (
+                        <IconButton
+                          edge="end"
+                          onClick={() => removeFile(fileObj.id)}
                           size="small"
                         >
                           <Delete />
@@ -362,9 +497,14 @@ const FileUpload = ({ onUploadSuccess, isMobile }) => {
                   <Tooltip title={fileObj.file.name} placement="top" arrow>
                     <ListItemText
                       primary={
-                        <Typography variant="body1" fontWeight="medium" noWrap>
-                          {fileObj.file.name}
-                        </Typography>
+                        <Box>
+                          <Typography variant="body1" fontWeight="medium" noWrap>
+                            {fileObj.file.name}
+                          </Typography>
+                          {fileObj.status === 'error' && openErrorFileId === fileObj.id && (
+                            renderErrorDetails(fileObj)
+                          )}
+                        </Box>
                       }
                       secondaryTypographyProps={{ component: "div" }}
                       secondary={
