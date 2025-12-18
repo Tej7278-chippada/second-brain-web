@@ -223,6 +223,63 @@ export const secondBrainAPI = {
     }
   },
 
+  // Time-based memory operations
+  async getUpcomingMemories(hoursAhead = 24) {
+    try {
+      const response = await api.get('/memories/upcoming', {
+        params: { hours: hoursAhead }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Get upcoming memories error:', error);
+      throw error;
+    }
+  },
+
+  async getExpiredMemories() {
+    try {
+      const response = await api.get('/memories/expired');
+      return response.data;
+    } catch (error) {
+      console.error('Get expired memories error:', error);
+      throw error;
+    }
+  },
+
+  async completeMemory(memoryKey, category = null) {
+    try {
+      const url = category 
+        ? `/memories/${memoryKey}/complete?category=${encodeURIComponent(category)}`
+        : `/memories/${memoryKey}/complete`;
+      
+      const response = await api.post(url);
+      return response.data;
+    } catch (error) {
+      console.error('Complete memory error:', error);
+      throw error;
+    }
+  },
+
+  async cleanupMemories(daysOld = 30) {
+    try {
+      const response = await api.post('/memories/cleanup', { days_old: daysOld });
+      return response.data;
+    } catch (error) {
+      console.error('Cleanup memories error:', error);
+      throw error;
+    }
+  },
+
+  async getMemoryTimeStats() {
+    try {
+      const response = await api.get('/memories/stats/time');
+      return response.data;
+    } catch (error) {
+      console.error('Get memory time stats error:', error);
+      throw error;
+    }
+  },
+
   async searchMemories(query) {
     try {
       const response = await api.get('/memories/search', { 
