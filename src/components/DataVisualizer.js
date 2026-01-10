@@ -361,7 +361,7 @@ const DataVisualizer = ({ uploadedDocuments = [] }) => {
         </Grid>
         <Grid size={{xs: 4, md: 4}}>
           <Card variant="outlined">
-            <CardContent sx={{ textAlign: 'center' }}>
+            <CardContent sx={{ textAlign: 'center', px: 1 }}>
               <Typography variant="h5" color="success.main">
                 {stats.totalChunks}
               </Typography>
@@ -463,7 +463,8 @@ const DataVisualizer = ({ uploadedDocuments = [] }) => {
           </Button>
         </Box>
       </Paper>
-
+      
+      <Paper sx={{ p: 1, borderRadius: 2 }}>
       {/* File Type Tabs */}
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
         <Tabs
@@ -516,15 +517,20 @@ const DataVisualizer = ({ uploadedDocuments = [] }) => {
             return (
               <React.Fragment key={uniqueKey}>
                 <ListItem
-                  secondaryAction={
-                    <IconButton
-                      edge="end"
-                      onClick={() => setDeleteDialog(doc.file_name)}
-                      color="error"
-                    >
-                      <Delete />
-                    </IconButton>
-                  }
+                  sx={{ px: 2,
+                    '& .MuiListItemText-root': {
+                      my: 0
+                    }
+                  }}
+                  // secondaryAction={
+                  //   <IconButton
+                  //     edge="end"
+                  //     onClick={() => setDeleteDialog(doc.file_name)}
+                  //     color="error"
+                  //   >
+                  //     <Delete />
+                  //   </IconButton>
+                  // }
                 >
                   <ListItemIcon>
                     {getFileIcon(doc.file_type)}
@@ -555,6 +561,7 @@ const DataVisualizer = ({ uploadedDocuments = [] }) => {
                           label={doc.file_type}
                           size="small"
                           variant="outlined"
+                          sx={{ fontSize: '0.7rem', height: '20px' }}
                         />
                       </Box>
                     }
@@ -566,11 +573,13 @@ const DataVisualizer = ({ uploadedDocuments = [] }) => {
                             label={`${formatFileSize(doc.file_size)}`}
                             size="small"
                             variant="outlined"
+                            sx={{ fontSize: '0.7rem', height: '20px' }}
                           />
                           <Chip
                             label={`${doc.total_chunks || 1} Chunks`}
                             size="small"
                             color="primary" ml={1}
+                            sx={{ fontSize: '0.7rem', height: '20px' }}
                           />
                           {/* <Typography variant="body2" color="text.secondary"
                             sx={{
@@ -590,27 +599,40 @@ const DataVisualizer = ({ uploadedDocuments = [] }) => {
                             {doc.content_preview}
                           </Typography> */}
                         </Box>
-                        <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+                        {/* <Box sx={{ display: 'flex', gap: 1, mt: 1 }}> */}
                           {/* <Typography variant="caption">
                             Size: {formatFileSize(doc.file_size)}
                           </Typography>
                           <Typography variant="caption">
                             Added: {new Date(doc.ingestion_time).toLocaleString()}
                           </Typography> */}
-                          <Typography variant="caption" color="text.secondary">
+                          {/* <Typography variant="caption" color="text.secondary">
                             {formatDate(doc.ingestion_time)}
                           </Typography>
-                        </Box>
+                        </Box> */}
                       </Box>
                     }
                   />
                 </ListItem>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2, mb: 1 }}>
+                  <Typography variant="caption" color="text.secondary">
+                    {formatDate(doc.ingestion_time)}
+                  </Typography>
+                  <IconButton
+                    edge="end"
+                    onClick={() => setDeleteDialog(doc.file_name)}
+                    color="error"
+                  >
+                    <Delete />
+                  </IconButton>
+                </Box>
                 {index < filteredDocs.length - 1 && <Divider />}
               </React.Fragment>
             );
           })}
         </List>
       )}
+      </Paper>
 
       {/* Document Detail Dialog */}
       <Dialog

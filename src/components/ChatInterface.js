@@ -25,18 +25,21 @@ import {
 } from '@mui/material';
 import {
   SmartToy,
-  Clear,
+  // Clear,
   // DeleteOutline,
   History,
   Download,
   // ArrowUpwardRounded,
   MoreVert,
   ContentCopy,
-  AutoAwesome,
+  // AutoAwesome,
   Refresh,
   Code,
   KeyboardArrowDown,
   KeyboardArrowUp,
+  // DeleteForeverRounded,
+  ClearAllRounded,
+  CloseRounded,
 } from '@mui/icons-material';
 import { secondBrainAPI } from '../services/api';
 import ArrowUpwardRoundedIcon from '@mui/icons-material/ArrowUpwardRounded';
@@ -339,8 +342,12 @@ const ChatInterface = ({ user, isMobile }) => {
   };
 
   const handleLoadHistory = async () => {
-    await loadConversationHistory();
-    setShowHistory(!showHistory);
+    if (showHistory) {
+      setShowHistory(false);
+    } else {
+      setShowHistory(true);
+      await loadConversationHistory();
+    }
   };
 
   // const enhancedDarkTheme = {
@@ -484,9 +491,14 @@ const ChatInterface = ({ user, isMobile }) => {
       {/* Header with Actions */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Typography variant="h6" gutterBottom>
-            Chat with Your Second Brain
-          </Typography>
+          <Box>
+            <Typography variant="h6" >
+              Hey! {user?.username?.charAt(0).toUpperCase() + user?.username?.slice(1)}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Chat with Your Second Brain
+            </Typography>
+          </Box>
           {/* {messages.length > 0 && (
             <Chip 
               label={`${messages.length} messages`}
@@ -497,7 +509,7 @@ const ChatInterface = ({ user, isMobile }) => {
         </Box>
         
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Tooltip title="Clear chat history">
+          {/* <Tooltip title="Clear chat history">
             <span>
               <IconButton
                 onClick={clearChat}
@@ -505,6 +517,16 @@ const ChatInterface = ({ user, isMobile }) => {
                 disabled={messages.length === 0}
               >
                 <Clear />
+              </IconButton>
+            </span>
+          </Tooltip> */}
+          <Tooltip title={showHistory ? 'Hide History' : 'Show Chat History'}>
+            <span>
+              <IconButton
+                onClick={() => { handleLoadHistory(); }}
+                size="small"
+              >
+                {showHistory ? <CloseRounded/> : <History />}
               </IconButton>
             </span>
           </Tooltip>
@@ -535,14 +557,14 @@ const ChatInterface = ({ user, isMobile }) => {
               <Download sx={{ mr: 1 }} fontSize="small" />
               Export Conversation
             </MenuItem>
-            <MenuItem onClick={() => { handleMenuClose(); handleLoadHistory(); }}>
+            {/* <MenuItem onClick={() => { handleMenuClose(); handleLoadHistory(); }}>
               <History sx={{ mr: 1 }} fontSize="small" />
               {showHistory ? 'Hide History' : 'Show History'}
-            </MenuItem>
-            <MenuItem onClick={() => { inputRef.current?.focus(); handleMenuClose(); }}>
+            </MenuItem> */}
+            {/* <MenuItem onClick={() => { inputRef.current?.focus(); handleMenuClose(); }}>
               <AutoAwesome sx={{ mr: 1 }} fontSize="small" />
               Focus Input
-            </MenuItem>
+            </MenuItem> */}
           </Menu>
         </Box>
       </Box>
@@ -555,10 +577,23 @@ const ChatInterface = ({ user, isMobile }) => {
               Recent Conversations
             </Typography>
             <Box>
-              <IconButton size="small" onClick={loadConversationHistory} disabled={isLoadingHistory}>
-                {isLoadingHistory ? <CircularProgress size={16} /> : <Refresh fontSize="small" />}
-              </IconButton>
-              <Tooltip title="Close history">
+              <Tooltip title="Refetch history">
+                <IconButton size="small" onClick={loadConversationHistory} disabled={isLoadingHistory}>
+                  {isLoadingHistory ? <CircularProgress size={16} /> : <Refresh fontSize="small" />}
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Clear history">
+                <span>
+                  <IconButton
+                    onClick={clearChat}
+                    size="small" sx={{ ml: 1 }}
+                    disabled={conversationHistory.length === 0 || isLoadingHistory}
+                  >
+                    <ClearAllRounded />
+                  </IconButton>
+                </span>
+              </Tooltip>
+              {/* <Tooltip title="Close history">
                 <span>
                   <IconButton
                     onClick={() => {setShowHistory(false)}}
@@ -568,7 +603,7 @@ const ChatInterface = ({ user, isMobile }) => {
                     <Clear />
                   </IconButton>
                 </span>
-              </Tooltip>
+              </Tooltip> */}
             </Box>
           </Box>
           {conversationHistory.length > 0 ? (
@@ -621,7 +656,7 @@ const ChatInterface = ({ user, isMobile }) => {
         }}
       >
         {messages.length === 0 ? (
-          <Box sx={{ textAlign: 'center', color: 'grey.500', my: 4 }}>
+          <Box sx={{ textAlign: 'center', color: 'grey.500', mt: isMobile? 9 : 5 }}>
             {/* <AutoAwesomeRoundedIcon sx={{ fontSize: 48, mb: 2 }} /> */}
             <img 
               src="/logo/logoanim.svg" 
@@ -660,7 +695,7 @@ const ChatInterface = ({ user, isMobile }) => {
             {messages.map((message) => (
               <React.Fragment key={message.id}>
                 <ListItem alignItems="flex-start" sx={{ px: 1}}>
-                  <ListItemAvatar>
+                  {/* <ListItemAvatar>
                     <Avatar sx={{ 
                       bgcolor: message.role === 'user' ? 'primary.main' : 
                               message.role === 'error' ? null : null, // 'error.main' : 'secondary.main',
@@ -675,12 +710,26 @@ const ChatInterface = ({ user, isMobile }) => {
                     }>
                       {message.role === 'user' ? user?.username?.[0]?.toUpperCase() : <SmartToy />}
                     </Avatar>
-                  </ListItemAvatar>
+                  </ListItemAvatar> */}
                   <ListItemText
                     primary={
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <Avatar sx={{ 
+                          bgcolor: message.role === 'user' ? 'primary.main' : 
+                                  message.role === 'error' ? null : null, // 'error.main' : 'secondary.main',
+                          // border: message.role === 'user' ? '3px solid rgba(0, 0, 0, 0.6)' : 
+                          //         message.role === 'error' ? '3px solid rgba(255, 0, 0, 0.6)' : null,
+                          borderRadius: message.role === 'user' ? '50%' : '8px',
+                        }}
+                        src={
+                          message.role === 'user'
+                            ? user?.profile_pic
+                            : "/logo/logo1.svg" 
+                        }>
+                          {message.role === 'user' ? user?.username?.[0]?.toUpperCase() : <SmartToy />}
+                        </Avatar>
                         <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: isMobile ? 'column' : 'row', gap: 0.5 }}>
-                          <Typography variant="subtitle2" component="span" fontWeight="bold">
+                          <Typography variant="subtitle1" component="span" fontWeight="bold">
                             {message.role === 'user' ? 'You' : 
                             message.role === 'error' ? 'Error' : 'Second Brain'}
                           </Typography>
@@ -690,6 +739,7 @@ const ChatInterface = ({ user, isMobile }) => {
                               size="small"
                               color={getConfidenceColor(message.confidence)}
                               variant="outlined"
+                              sx={{ fontSize: '0.7rem', height: '20px', }}
                             />
                           )}
                         </Box>
@@ -703,7 +753,7 @@ const ChatInterface = ({ user, isMobile }) => {
                       <Box>
                         <Box 
                           sx={{ 
-                            mb: 1,
+                            my: 1,
                             p: 1,
                             borderRadius: 1,
                             bgcolor: message.role === 'user' ? 'action.hover' : 'transparent'
@@ -749,7 +799,7 @@ const ChatInterface = ({ user, isMobile }) => {
                     }
                   />
                 </ListItem>
-                <Divider variant="inset" component="li" sx={{ my: 1 }} />
+                <Divider component="li" sx={{ my: 1 }} />   {/* variant="inset"  */}
               </React.Fragment>
             ))}
             {loading && (
@@ -783,7 +833,7 @@ const ChatInterface = ({ user, isMobile }) => {
       {/* Input Area */}
       <Box 
         sx={{
-          position: 'fixed', // stays fixed at bottom even when scrolling
+          position: 'fixed', // 'fixed' stays fixed at bottom even when scrolling
           bottom: 0,
           left: '50%',
           transform: 'translateX(-50%)', // perfectly centers horizontally
@@ -792,7 +842,7 @@ const ChatInterface = ({ user, isMobile }) => {
           display: 'flex',
           flexDirection: 'column',
           gap: 1,
-          px: 2,
+          px: 1.5,
           py: 1.5,
           bgcolor: 'background.paper',
           boxShadow: '0 -4px 20px rgba(0,0,0,0.1)',
@@ -803,7 +853,7 @@ const ChatInterface = ({ user, isMobile }) => {
         }}
       >
         {/* Quick Actions */}
-        <Box sx={{ display: 'flex', gap: 1, overflowX: 'auto', pb: 1, scrollbarWidth: 'none' }}>
+        {/* <Box sx={{ display: 'flex', gap: 1, overflowX: 'auto', pb: 1, scrollbarWidth: 'none' }}>
           {["Summarize documents of mine", "Show memories", "What can you do?"].map((text) => (
             <Chip
               key={text}
@@ -814,12 +864,12 @@ const ChatInterface = ({ user, isMobile }) => {
               sx={{ flexShrink: 0 }}
             />
           ))}
-        </Box>
+        </Box> */}
         
         <TextField
           fullWidth
           variant="outlined"
-          placeholder="Ask a question or give a command... (e.g., 'memorize my phone number as 1234567890')"
+          placeholder="Ask a question about your memories or files."
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
@@ -835,7 +885,7 @@ const ChatInterface = ({ user, isMobile }) => {
             }
           }}
           InputProps={{
-            endAdornment: (
+            endAdornment: !isMobile && (
               <InputAdornment position="end">
                 <IconButton 
                   onClick={handleSend}
@@ -859,6 +909,56 @@ const ChatInterface = ({ user, isMobile }) => {
             ),
           }}
         />
+        <Box 
+          sx={{
+            display: 'flex', 
+            justifyContent: 'space-between',
+            // bgcolor: 'background.default',
+            // borderRadius: 1,
+            // '& .MuiOutlinedInput-root': {
+            //   paddingRight: 1,
+            // },
+            alignItems: 'center',
+            px: 0.5,
+            gap: 1,
+          }}
+        >
+          <Box sx={{ display: 'flex', gap: 1, overflowX: 'auto', scrollbarWidth: 'none' }}>
+            {["Summarize documents of mine", "Summarize the context of last ingested file", "What can you do?"].map((text) => (
+              <Chip
+                key={text}
+                label={text}
+                size="small"
+                variant="outlined"
+                onClick={() => setInput(text)}
+                sx={{ flexShrink: 0 }}
+              />
+            ))}
+          </Box>
+          {isMobile && (
+            <IconButton 
+              onClick={handleSend}
+              disabled={loading || !input.trim()}
+              size="small"
+              // variant="contained"
+              sx={{ 
+                color: input.trim() ? 'primary.main' : 'action.disabled',
+                bgcolor: 'background.default',
+                // backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(5px)',
+                border: input.trim() ? null : '1px solid rgba(255, 255, 255, 0.2)', 
+                alignItems: 'flex-end',
+                transition: 'all 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                }
+              }}
+            >
+              <ArrowUpwardRoundedIcon />
+            </IconButton>
+          )}
+        </Box>
+
         {/* <Button
           variant="contained"
           endIcon={<Send />}
@@ -869,9 +969,9 @@ const ChatInterface = ({ user, isMobile }) => {
           Send
         </Button> */}
         
-        <Typography variant="caption" color="text.secondary" align="center">
+        {/* <Typography variant="caption" color="text.secondary" align="center">
           Press Enter to send • Shift+Enter for new line
-        </Typography>
+        </Typography> */}
       </Box>
 
       {/* Snackbar for notifications */}

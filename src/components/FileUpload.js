@@ -405,7 +405,7 @@ const FileUpload = ({ onUploadSuccess, isMobile }) => {
         // onDragLeave={() => setDragActive(false)}
         // onDrop={handleDrop}
         sx={{ 
-          p: 4, 
+          p: 4, mt: 2,
           textAlign: 'center',
           border: '2px dashed',
           borderColor: isDragActive ? 'primary.main' : (uploading || files.some(f => f.status === 'success')) ? 'action.disabled' : 'divider',

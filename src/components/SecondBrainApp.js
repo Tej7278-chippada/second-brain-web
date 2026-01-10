@@ -6,9 +6,9 @@ import {
   ToggleButtonGroup,
   ToggleButton,
   CircularProgress,
-  SpeedDial,
-  SpeedDialAction,
-  SpeedDialIcon,
+  // SpeedDial,
+  // SpeedDialAction,
+  // SpeedDialIcon,
   // Badge,
   useTheme,
   useMediaQuery,
@@ -27,10 +27,10 @@ import {
   // Storage,
   // Psychology,
   // Add,
-  Upload,
-  Memory as MemoryIcon,
+  // Upload,
+  // Memory as MemoryIcon,
   // Description,
-  Dashboard,
+  // Dashboard,
   Storage
 } from '@mui/icons-material';
 
@@ -116,7 +116,7 @@ function SecondBrainApp({ user, darkMode }) {
     loading: true,
     error: null
   });
-  const [showSpeedDial, setShowSpeedDial] = useState(false);
+  // const [showSpeedDial, setShowSpeedDial] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -202,25 +202,25 @@ function SecondBrainApp({ user, darkMode }) {
     }
   };
 
-  const speedDialActions = [
-    { icon: <Upload />, name: 'Upload File', onClick: () => setActiveTab('upload') },
-    { icon: <MemoryIcon />, name: 'Add Memory', onClick: () => {
-      const memoryInput = prompt('Enter memory command:');
-      if (memoryInput) {
-        secondBrainAPI.addMemory(memoryInput).then(() => {
-          // loadTabStats();
-          setActiveTab('memories');
-        });
-      }
-    }},
-    { icon: <Dashboard />, name: 'View Stats', onClick: () => {
-      secondBrainAPI.getUserStats().then(stats => {
-        alert(`Documents: ${stats.vector_store?.unique_files || 0}\n` +
-              `Chunks: ${stats.vector_store?.total_chunks || 0}\n` +
-              `Memories: ${stats.memories?.total_memories || 0}`);
-      });
-    }},
-  ];
+  // const speedDialActions = [
+  //   { icon: <Upload />, name: 'Upload File', onClick: () => setActiveTab('upload') },
+  //   { icon: <MemoryIcon />, name: 'Add Memory', onClick: () => {
+  //     const memoryInput = prompt('Enter memory command:');
+  //     if (memoryInput) {
+  //       secondBrainAPI.addMemory(memoryInput).then(() => {
+  //         // loadTabStats();
+  //         setActiveTab('memories');
+  //       });
+  //     }
+  //   }},
+  //   { icon: <Dashboard />, name: 'View Stats', onClick: () => {
+  //     secondBrainAPI.getUserStats().then(stats => {
+  //       alert(`Documents: ${stats.vector_store?.unique_files || 0}\n` +
+  //             `Chunks: ${stats.vector_store?.total_chunks || 0}\n` +
+  //             `Memories: ${stats.memories?.total_memories || 0}`);
+  //     });
+  //   }},
+  // ];
 
   return (
     <Box sx={{ width: '100%', position: 'relative', pb: isMobile ? 8 : 4 }}>
@@ -414,11 +414,13 @@ function SecondBrainApp({ user, darkMode }) {
         minHeight: '60vh',
         borderRadius: 2
       }}> */}
+      <Box sx={{ p: 1 }}>
         {renderContent()}
+      </Box>
       {/* </Paper> */}
 
       {/* Speed Dial for Mobile */}
-      {isMobile && (
+      {/* {isMobile && (
         <SpeedDial
           ariaLabel="Quick actions"
           sx={{ position: 'fixed', bottom: 80, right: 16 }}
@@ -436,7 +438,7 @@ function SecondBrainApp({ user, darkMode }) {
             />
           ))}
         </SpeedDial>
-      )}
+      )} */}
     </Box>
   );
 }

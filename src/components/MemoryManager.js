@@ -371,12 +371,12 @@ const MemoryManager = () => {
 
   const quickAddExamples = [
     { text: "memorize my phone number as 1234567890", category: "personal_info" },
-    { text: "remember John owes me 5000 rupees", category: "financial" },
-    { text: "store tulasi's phone number as 7278949280", category: "contacts" },
-    { text: "I borrowed charger from Rashmi", category: "borrowed_items" },
+    { text: "remember this Arjun owes me 5000 rupees", category: "financial" },
+    { text: "memorize Abhi phone number as 9876543210", category: "contacts" },
+    { text: "store this I borrowed charger from Rashmi", category: "borrowed_items" },
     { text: "remember this I have meeting with Arjun tomorrow at 11AM", category: "important_notes" },
     { text: "memorize that I have dentist appointment on Friday at 2 PM", category: "important_notes" },
-    { text: "remember to call client on Monday at 10 AM", category: "important_notes" }
+    { text: "remember this to call client on Monday at 10 AM", category: "important_notes" }
   ];
 
   const renderTimeBasedMemory = (memory) => {
@@ -444,7 +444,13 @@ const MemoryManager = () => {
             No upcoming reminders
           </Typography>
         ) : (
-          <List>
+          <List 
+            sx={{ 
+              '& .MuiListItem-root': {
+                px: 1
+              }
+            }}
+          >
             {upcomingMemories.map((memory, index) => (
               <React.Fragment key={memory.key}>
                 <ListItem
@@ -474,6 +480,7 @@ const MemoryManager = () => {
                           size="small"
                           color="primary"
                           variant="outlined"
+                          sx={{ fontSize: '0.7rem', height: '20px', }}
                         />
                       </Box>
                     }
@@ -551,7 +558,13 @@ const MemoryManager = () => {
             No past due reminders
           </Typography>
         ) : (
-          <List>
+          <List
+            sx={{ 
+              '& .MuiListItem-root': {
+                px: 1
+              }
+            }}
+          >
             {expiredMemories.map((memory, index) => (
               <React.Fragment key={memory.key}>
                 <ListItem
@@ -613,22 +626,30 @@ const MemoryManager = () => {
   return (
     <Box>
       {/* Header with Stats */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box>
-          <Typography variant={isMobile ? 'h6' : 'h5'} gutterBottom>
-            Memory Management
-          </Typography>
+      <Box sx={{ mb: 3, width: '100%'  }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+            <Typography variant={isMobile ? 'h6' : 'h5'} gutterBottom>
+              Memory Management
+            </Typography>
+            <Chip 
+              icon={<Memory />}
+              label={`${stats.total} memories`}
+              color="primary"
+              variant="outlined"
+              size="small"
+            />
+          </Box>
           <Typography variant="body2" color="text.secondary">
             Store and recall personal information, contacts, debts, and reminders
           </Typography>
-        </Box>
         {/* <Box sx={{ display: 'flex', gap: 1 }}> */}
-          <Chip 
+          {/* <Chip 
             icon={<Memory />}
             label={`${stats.total} memories`}
             color="primary"
             variant="outlined"
-          />
+            size="small"
+          /> */}
           {/* {stats.timedCount > 0 && (
             <Chip 
               icon={<AccessTime />}
@@ -641,12 +662,12 @@ const MemoryManager = () => {
       </Box>
 
       {/* Add Memory Section */}
-      <Paper elevation={1} sx={{ p: 3, mb: 3, borderRadius: 2 }}>
+      <Paper elevation={1} sx={{ p: 2, mb: 3, borderRadius: 2 }}>
         <Typography variant="h6" gutterBottom>
           Add New Memory
         </Typography>
         
-        <Alert severity="info" sx={{ mb: 2 }}>
+        <Alert severity="info" sx={{ mb: isMobile ? 2 : 3 }}>
           <Typography variant="body2">
             Use natural language to add memories. Examples:
           </Typography>
@@ -930,7 +951,7 @@ const MemoryManager = () => {
               key={tab.value}
               value={tab.value}
               label={
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'center' }}>
                   {getMemoryIcon(tab.value)}
                   <span>{tab.label}</span>
                   {tab.count > 0 && (
@@ -965,13 +986,13 @@ const MemoryManager = () => {
       ) : (
         Object.entries(groupedMemories).map(([category, categoryMemories]) => (
           <Fade in key={category}>
-            <Paper sx={{ p: 3, mb: 3, borderRadius: 2 }}>
+            <Paper sx={{ p: isMobile? 2 : 3, mb: isMobile ? 2 : 3, borderRadius: 2 }}>
               <Box 
                 sx={{ 
                   display: 'flex', 
                   alignItems: 'center', 
                   gap: 1, 
-                  mb: 2,
+                  mb: 0,
                   cursor: 'pointer',
                   '&:hover': { opacity: 0.8 }
                 }}
@@ -985,41 +1006,47 @@ const MemoryManager = () => {
               </Box>
               
               <Collapse in={expandedCategory === category}> {/* expandedCategory === 'all' || */}
-                <List>
+                <List 
+                  sx={{ 
+                    '& .MuiListItem-root': {
+                      px: 1
+                    }
+                  }}>
                   {categoryMemories.map((memory, index) => (
                     <React.Fragment key={memory.key}>
                       <ListItem
-                        secondaryAction={
-                          <Box sx={{ display: 'flex', gap: 0.5 }}>
-                            {memory.memory.is_timed && !memory.memory.is_completed && (
-                              <Tooltip title="Mark as completed">
-                                <IconButton
-                                  edge="end"
-                                  onClick={() => handleCompleteMemory(memory.key, memory.category)}
-                                  size="small"
-                                  color="success"
-                                >
-                                  <CheckCircle />
-                                </IconButton>
-                              </Tooltip>
-                            )}
-                            <IconButton
-                              edge="end"
-                              onClick={() => setDeleteDialog(memory.key)}
-                              color="error"
-                              size="small"
-                            >
-                              <Delete />
-                            </IconButton>
-                          </Box>
-                        }
+                        // secondaryAction={
+                        //   <Box sx={{ display: 'flex', gap: 0.5 }}>
+                        //     {memory.memory.is_timed && !memory.memory.is_completed && (
+                        //       <Tooltip title="Mark as completed">
+                        //         <IconButton
+                        //           edge="end"
+                        //           onClick={() => handleCompleteMemory(memory.key, memory.category)}
+                        //           size="small"
+                        //           color="success"
+                        //         >
+                        //           <CheckCircle />
+                        //         </IconButton>
+                        //       </Tooltip>
+                        //     )}
+                        //     <IconButton
+                        //       edge="end"
+                        //       onClick={() => setDeleteDialog(memory.key)}
+                        //       color="error"
+                        //       size="small"
+                        //     >
+                        //       <Delete />
+                        //     </IconButton>
+                        //   </Box>
+                        // }
                       >
-                        <ListItemIcon>
+                        {/* <ListItemIcon>
                           {getMemoryIcon(category, memory.memory.is_timed)}
-                        </ListItemIcon>
+                        </ListItemIcon> */}
                         <ListItemText
                           primary={
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, flexWrap: 'wrap' }}>
+                              {getMemoryIcon(category, memory.memory.is_timed)}
                               <Typography variant="subtitle1" fontWeight="medium">
                                 {memory.original_key.replace(/_/g, ' ')}
                               </Typography>
@@ -1028,6 +1055,7 @@ const MemoryManager = () => {
                                 size="small"
                                 color={getMemoryColor(category, memory.memory.is_timed)}
                                 variant="outlined"
+                                sx={{ fontSize: '0.7rem', height: '20px', }}
                               />
                               {memory.memory.is_timed && (
                                 <Chip
@@ -1035,11 +1063,12 @@ const MemoryManager = () => {
                                   size="small"
                                   color={getMemoryStatus(memory).color}
                                   icon={getMemoryStatus(memory).icon}
+                                  sx={{ fontSize: '0.7rem', height: '20px', }}
                                 />
                               )}
-                              <Typography variant="caption" color="text.secondary" sx={{ ml: 'auto' }}>
+                              {/* <Typography variant="caption" color="text.secondary" sx={{ ml: 'auto' }}>
                                 {formatDate(memory.memory.created_at)}
-                              </Typography>
+                              </Typography> */}
                             </Box>
                           }
                           secondaryTypographyProps={{ component: "div" }}
@@ -1061,7 +1090,34 @@ const MemoryManager = () => {
                           }
                         />
                       </ListItem>
-                      {index < categoryMemories.length - 1 && <Divider variant="inset" component="li" />}
+                      <Box sx={{ display: 'flex', gap: 0.5, my: 1, px: 1, justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Typography variant="caption" color="text.secondary" >
+                          {formatDate(memory.memory.created_at)}
+                        </Typography>
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                          {memory.memory.is_timed && !memory.memory.is_completed && (
+                            <Tooltip title="Mark as completed">
+                              <IconButton
+                                edge="end"
+                                onClick={() => handleCompleteMemory(memory.key, memory.category)}
+                                size="small"
+                                color="success"
+                              >
+                                <CheckCircle />
+                              </IconButton>
+                            </Tooltip>
+                          )}
+                          <IconButton
+                            edge="end"
+                            onClick={() => setDeleteDialog(memory.key)}
+                            color="error"
+                            size="small"
+                          >
+                            <Delete />
+                          </IconButton>
+                        </Box>
+                      </Box>
+                      {index < categoryMemories.length - 1 && <Divider  component="li" />} {/* variant="inset" */}
                     </React.Fragment>
                   ))}
                 </List>

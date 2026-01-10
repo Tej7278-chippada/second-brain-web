@@ -46,27 +46,34 @@ function Header({ user, onLogout, isMobile, darkMode }) {
   };
 
   return (
-    <AppBar position="sticky" elevation={1}>
-      <Toolbar sx={{ padding: isMobile ? '4px 8px' : '4px 16px' }}>
+    <AppBar position="fixed" elevation={1}> {/* sticky */}
+      <Toolbar 
+      // sx={{ padding: isMobile ? '4px 8px' : '4px 16px' }}
+        sx={{
+          minHeight: { xs: 56, sm: 64 },
+          px: { xs: 2, sm: 3 },
+          justifyContent: 'space-between'
+        }}
+      >
         <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
           {/* <BrainIcon sx={{ mr: 2, fontSize: isMobile ? 28 : 32 }} /> */}
         <img 
           src="/logo/logo1.svg" 
           alt="Second Brain Logo" 
           style={{ 
-            width: isMobile ? 30 : 40, 
-            height: isMobile ? 30 : 40,
-            marginRight: 4 
+            width: isMobile ? 35 : 45, 
+            height: isMobile ? 35 : 45,
+            marginRight: 8 
           }} 
         />
-          <Box>
-            <Typography variant="h6" component="h1" fontWeight="bold" noWrap>
+          {/* <Box> */}
+            <Typography variant={isMobile ? "h6" : "h5"} component="h1" fontWeight="bold" noWrap>
               Second Brain
             </Typography>
-            <Typography variant="caption" component="h1" color="text.secondary" noWrap>
+            {/* <Typography variant="caption" component="h1" color="text.secondary" noWrap>
               Your AI-powered personal knowledge assistant
             </Typography>
-          </Box>
+          </Box> */}
         </Box>
         
         {user && (

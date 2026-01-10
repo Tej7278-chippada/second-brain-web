@@ -93,7 +93,7 @@ function AppContent() {
           <ProtectedRoute isAuthenticated={isAuthenticated}>
             <ChatProvider user={user}> {/* Wrap with ChatProvider */}
               <Header user={user} onLogout={handleLogout} isMobile={isMobile}/>
-              <Container maxWidth="md" sx={{ flex: 1, px: 1, py: 2 }}>
+              <Container maxWidth="md" sx={{ flex: 1, px: 1, py: 2, mt: 7 }}>
                 <SecondBrainApp user={user} isMobile={isMobile}/>
               </Container>
             </ChatProvider>
