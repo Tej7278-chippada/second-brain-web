@@ -51,6 +51,8 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { prism, vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 // Helper function to detect code blocks in text
 const detectCodeBlocks = (text) => {
@@ -472,17 +474,19 @@ const ChatInterface = ({ user, isMobile }) => {
         );
       } else {
         return (
-          <Typography
-            key={index}
-            component="span"
-            sx={{
-              lineHeight: 1.6,
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-word'
-            }}
-          >
-            {block.content}
-          </Typography>
+          // <Typography
+          //   key={index}
+          //   component="span"
+          //   sx={{
+          //     lineHeight: 1.6,
+          //     whiteSpace: 'pre-wrap',
+          //     wordBreak: 'break-word'
+          //   }}
+          // >
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {block.content}
+            </ReactMarkdown>
+          // </Typography>
         );
       }
     });
@@ -730,24 +734,24 @@ const ChatInterface = ({ user, isMobile }) => {
                         }>
                           {message.role === 'user' ? user?.username?.[0]?.toUpperCase() : <SmartToy />}
                         </Avatar>
-                        <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: isMobile ? 'column' : 'row', gap: 0.5 }}>
+                        <Box sx={{ display: 'flex',  flexDirection: 'column',  }}>
                           <Typography variant="subtitle1" component="span" fontWeight="bold">
                             {message.role === 'user' ? 'You' : 
                             message.role === 'error' ? 'Error' : 'Second Brain'}
                           </Typography>
-                          {message.confidence && (
+                          <Typography variant="caption" color="text.secondary" >
+                            {formatTimeAgo(message.timestamp)}
+                          </Typography>
+                        </Box>
+                        {message.confidence && (
                             <Chip 
                               label={`${(message.confidence * 100).toFixed(0)}% confident`}
                               size="small"
                               color={getConfidenceColor(message.confidence)}
                               variant="outlined"
-                              sx={{ fontSize: '0.7rem', height: '20px', }}
+                              sx={{ fontSize: '0.7rem', height: '20px', ml: 'auto' }}
                             />
                           )}
-                        </Box>
-                        <Typography variant="caption" color="text.secondary" sx={{ ml: 'auto' }}>
-                          {formatTimeAgo(message.timestamp)}
-                        </Typography>
                       </Box>
                     }
                     secondaryTypographyProps={{ component: "div" }}
@@ -871,7 +875,7 @@ const ChatInterface = ({ user, isMobile }) => {
         <TextField
           fullWidth
           variant="outlined"
-          placeholder="Ask a question about your memories or files."
+          placeholder="Ask a question about your memories."
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}

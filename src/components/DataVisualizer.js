@@ -54,7 +54,7 @@ import {
   Clear
 } from '@mui/icons-material';
 import { secondBrainAPI } from '../services/api';
-import { formatDistanceToNow } from 'date-fns';
+// import { formatDistanceToNow } from 'date-fns';
 
 const DataVisualizer = ({ uploadedDocuments = [] }) => {
   const theme = useTheme();
@@ -279,14 +279,20 @@ const DataVisualizer = ({ uploadedDocuments = [] }) => {
     return mb < 1 ? `${(bytes / 1024).toFixed(2)} KB` : `${mb.toFixed(2)} MB`;
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return 'Unknown';
-    try {
-      return formatDistanceToNow(new Date(dateString), { addSuffix: true });
-    } catch (e) {
-      return 'Invalid date';
-    }
-  };
+  // const formatDate = (dateString) => {
+  //   if (!dateString) return 'Unknown';
+  //   try {
+  //     return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+  //   } catch (e) {
+  //     return 'Invalid date';
+  //   }
+  // };
+
+  const formatDate = (date) =>
+    date ? new Date(date).toLocaleString('en-IN', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }) : '—';
 
   const getFileTypeCategories = () => {
     const categories = Object.entries(stats.byType)

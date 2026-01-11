@@ -79,7 +79,7 @@ import {
   // Update
 } from '@mui/icons-material';
 import { secondBrainAPI } from '../services/api';
-import { formatDistanceToNow, format, isAfter, isBefore, parseISO } from 'date-fns';
+import { format, isAfter, isBefore, parseISO } from 'date-fns'; // formatDistanceToNow,
 
 const MemoryManager = () => {
   const theme = useTheme();
@@ -337,9 +337,15 @@ const MemoryManager = () => {
     }))
   ];
 
-  const formatDate = (dateString) => {
-    return formatDistanceToNow(new Date(dateString), { addSuffix: true });
-  };
+  // const formatDate = (dateString) => {
+  //   return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+  // };
+
+  const formatDate = (date) =>
+    date ? new Date(date).toLocaleString('en-IN', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }) : '—';
 
   const formatEventTime = (dateString) => {
     if (!dateString) return null;
