@@ -182,6 +182,27 @@ const ChatInterface = ({ user, isMobile }) => {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, 100);
   };
+  const [showInput, setShowInput] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const scrollDifference = Math.abs(currentScrollY - lastScrollY);
+
+      if (scrollDifference > 5) {
+        if (currentScrollY < lastScrollY) {
+          setShowInput(true); // scrolling up
+        } else if (currentScrollY > lastScrollY + 15) { // Added buffer for downward scroll
+          setShowInput(false); // scrolling down
+        }
+        setLastScrollY(currentScrollY);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   // Add user greeting on first load
   // useEffect(() => {
@@ -837,12 +858,37 @@ const ChatInterface = ({ user, isMobile }) => {
       </Paper>
 
       {/* Input Area */}
+      <Box
+        sx={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1200, 
+          transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease',
+          transform: showInput ? 'translateY(0)' : 'translateY(100%)',
+          opacity: showInput ? 1 : 0.8,
+          pointerEvents: showInput ? 'auto' : 'none',
+          display: 'flex',
+          justifyContent: 'center', // Center horizontally
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '1px',
+            background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0), transparent)',
+          }
+        }}
+        elevation={3}
+      >
       <Box 
         sx={{
-          position: 'fixed', // 'fixed' stays fixed at bottom even when scrolling
-          bottom: 0,
-          left: '50%',
-          transform: 'translateX(-50%)', // perfectly centers horizontally
+          // position: 'fixed', // 'fixed' stays fixed at bottom even when scrolling
+          // bottom: 0,
+          // left: '50%',
+          // transform: 'translateX(-50%)', // perfectly centers horizontally
           width: '100%',
           maxWidth: (theme) => theme.breakpoints.values.md,
           display: 'flex',
@@ -978,6 +1024,7 @@ const ChatInterface = ({ user, isMobile }) => {
         {/* <Typography variant="caption" color="text.secondary" align="center">
           Press Enter to send • Shift+Enter for new line
         </Typography> */}
+      </Box>
       </Box>
 
       {/* Snackbar for notifications */}
