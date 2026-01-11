@@ -184,11 +184,18 @@ const ChatInterface = ({ user, isMobile }) => {
   };
   const [showInput, setShowInput] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [isInputFocused, setIsInputFocused] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       const scrollDifference = Math.abs(currentScrollY - lastScrollY);
+
+      // Don't hide menu if input is focused (keyboard is open)
+      if (isInputFocused) {
+        setShowInput(true);
+        return;
+      }
 
       if (scrollDifference > 5) {
         if (currentScrollY < lastScrollY) {
@@ -202,7 +209,7 @@ const ChatInterface = ({ user, isMobile }) => {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+  }, [lastScrollY, isInputFocused]);
 
   // Add user greeting on first load
   // useEffect(() => {
@@ -228,6 +235,17 @@ const ChatInterface = ({ user, isMobile }) => {
        inputRef.current?.focus();
     }
   }, [loadConversationHistory, isMobile]);
+
+  // Add focus handlers to TextField
+  const handleInputFocus = () => {
+    setIsInputFocused(true);
+    setShowInput(true); // Always show menu when input is focused
+  };
+
+  const handleInputBlur = () => {
+    setIsInputFocused(false);
+    // Don't immediately hide on blur, let the scroll handler manage it
+  };
 
   // const loadConversationHistory = async () => {
   //   try {
@@ -925,6 +943,8 @@ const ChatInterface = ({ user, isMobile }) => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
+          onFocus={handleInputFocus}
+          onBlur={handleInputBlur}
           disabled={loading}
           multiline
           maxRows={6}
