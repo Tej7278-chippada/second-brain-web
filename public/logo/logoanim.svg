@@ -37,7 +37,7 @@
     </defs>
     
     <!-- Neural network icon centered -->
-    <g transform="translate(20,20)">
+    <g transform="translate(25,25)">
         <!-- Connection lines forming a brain-like network -->
         <g opacity="0.6" stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round">
             <!-- Central connections -->

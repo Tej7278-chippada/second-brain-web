@@ -201,8 +201,10 @@ const ChatInterface = ({ user, isMobile }) => {
 
   useEffect(() => {
     // loadConversationHistory();
-    inputRef.current?.focus();
-  }, [loadConversationHistory]);
+    if (!isMobile) {
+       inputRef.current?.focus();
+    }
+  }, [loadConversationHistory, isMobile]);
 
   // const loadConversationHistory = async () => {
   //   try {
@@ -656,7 +658,7 @@ const ChatInterface = ({ user, isMobile }) => {
         }}
       >
         {messages.length === 0 ? (
-          <Box sx={{ textAlign: 'center', color: 'grey.500', mt: isMobile? 9 : 5 }}>
+          <Box sx={{ textAlign: 'center', color: 'grey.500', mt: isMobile? 6 : 2 }}>
             {/* <AutoAwesomeRoundedIcon sx={{ fontSize: 48, mb: 2 }} /> */}
             <img 
               src="/logo/logoanim.svg" 
