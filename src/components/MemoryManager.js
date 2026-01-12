@@ -128,6 +128,7 @@ const MemoryManager = () => {
   }, []);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     loadMemories();
   }, [loadMemories]);
 

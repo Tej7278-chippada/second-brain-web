@@ -1,5 +1,5 @@
 // src/components/ChatInterface.js
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Box,
   TextField,
@@ -40,6 +40,8 @@ import {
   // DeleteForeverRounded,
   ClearAllRounded,
   CloseRounded,
+  FiberManualRecord,
+  HorizontalRuleRounded,
 } from '@mui/icons-material';
 import { secondBrainAPI } from '../services/api';
 import ArrowUpwardRoundedIcon from '@mui/icons-material/ArrowUpwardRounded';
@@ -185,6 +187,90 @@ const ChatInterface = ({ user, isMobile }) => {
   const [showInput, setShowInput] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isInputFocused, setIsInputFocused] = useState(false);
+  const [messageDots, setMessageDots] = useState([]);
+  const [hoveredDot, setHoveredDot] = useState(null);
+  const [clickedDot, setClickedDot] = useState(null);
+  const [activeMessage, setActiveMessage] = useState(null);
+  // const [showMessagePanel, setShowMessagePanel] = useState(false);
+  const chatContainerRef = useRef(null);
+
+  // Extract user questions from messages
+  const extractUserQuestions = useCallback(() => {
+    const userQuestions = messages
+      .filter(msg => msg.role === 'user')
+      .map((msg, index) => ({
+        id: `dot-${msg.id}`,
+        messageId: msg.id,
+        index: index + 1,
+        content:
+          msg.content.length > 40
+            ? msg.content.substring(0, 40) + '...'
+            : msg.content,
+        fullContent: msg.content,
+        timestamp: msg.timestamp,
+      }));
+
+    return userQuestions;
+  }, [messages]);
+
+  // Update message dots when messages change
+  useEffect(() => {
+    const userQuestions = extractUserQuestions();
+    setMessageDots(userQuestions);
+  }, [extractUserQuestions]);
+
+  // Function to scroll to a specific user question
+  const scrollToQuestion = (messageId) => {
+    const messageElement = document.getElementById(`message-${messageId}`);
+    if (messageElement) {
+      // Scroll to message
+      messageElement.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center' 
+      });
+      
+      // Highlight the message with animation
+      messageElement.style.transition = 'background-color 0.5s ease';
+      messageElement.style.backgroundColor = 'rgba(25, 118, 210, 0.15)';
+      messageElement.style.borderRadius = '8px';
+      messageElement.style.boxShadow = '0 0 0 2px rgba(25, 118, 210, 0.3)';
+      
+      setTimeout(() => {
+        messageElement.style.backgroundColor = '';
+        messageElement.style.boxShadow = '';
+      }, 2000);
+    }
+  };
+
+  // Handle dot click
+  const handleDotClick = (question) => {
+    setClickedDot(question.id);
+    setActiveMessage(question);
+    scrollToQuestion(question.messageId);
+    
+    // Show message panel on mobile
+    // if (isMobile) {
+    //   setShowMessagePanel(true);
+    // }
+    
+    // Reset clicked dot after delay
+    setTimeout(() => {
+      setClickedDot(null);
+    }, 1000);
+  };
+
+  // Handle dot hover
+  const handleDotHover = (question) => {
+    setHoveredDot(question.id);
+    if (!isMobile) {
+      setActiveMessage(question);
+    }
+  };
+
+  // Handle dot leave
+  const handleDotLeave = () => {
+    setHoveredDot(null);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -549,8 +635,218 @@ const ChatInterface = ({ user, isMobile }) => {
     });
   };
 
+  // Render message dots panel
+  const renderMessageDots = () => {
+    if (messageDots.length === 0) return null;
+
+    return (
+      <Box
+        sx={{
+          position: 'fixed',
+          right: isMobile ? 0 : 16,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 1.5,
+          zIndex: 1000,
+          alignItems: 'center',
+          // backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          backdropFilter: 'blur(10px)',
+          borderRadius: '20px',
+          p: isMobile ? 0.5 : 0.5,
+          border: '1px solid rgba(0, 0, 0, 0.1)',
+          boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+        }}
+      >
+        {/* <Typography 
+          variant="caption" 
+          sx={{ 
+            color: 'text.secondary',
+            fontWeight: 500,
+            mb: 0.5,
+            fontSize: '0.7rem'
+          }}
+        >
+          Questions
+        </Typography> */}
+        {messageDots.map((question, index) => {
+          const isHovered = hoveredDot === question.id;
+          const isClicked = clickedDot === question.id;
+          const isActive = activeMessage?.id === question.id;
+          
+          return (
+            // <Tooltip
+            //   key={question.id}
+            //   title={
+            //     <Box sx={{ p: 0.5, background: 'background.default' }}>
+            //       <Typography variant="caption" fontWeight="bold">
+            //         Question {question.index}
+            //       </Typography>
+            //       <Typography variant="caption" component="div" sx={{ mt: 0.5 }}>
+            //         {question.content}
+            //       </Typography>
+            //       <Typography variant="caption" color="text.secondary" component="div" sx={{ mt: 0.5 }}>
+            //         {formatTimeAgo(question.timestamp)}
+            //       </Typography>
+            //       <Typography variant="caption" color="primary" component="div" sx={{ mt: 0.5, fontStyle: 'italic' }}>
+            //         Click to jump to question
+            //       </Typography>
+            //     </Box>
+            //   }
+            //   placement="left"
+            //   arrow
+            //   PopperProps={{
+            //     modifiers: [
+            //       {
+            //         name: 'offset',
+            //         options: {
+            //           offset: [0, 10],
+            //         },
+            //       },
+            //     ],
+            //   }}
+            // >
+              <Box
+                onClick={() => handleDotClick(question)}
+                onMouseEnter={() => handleDotHover(question)}
+                onMouseLeave={handleDotLeave}
+                sx={{
+                  width: 18,
+                  height: 28,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  position: 'relative',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    transform: 'scale(1.2)',
+                  },
+                  WebkitTapHighlightColor: 'transparent', // Remove tap highlight
+                  WebkitTouchCallout: 'none', // Disable iOS callout
+                  WebkitUserSelect: 'none', // Disable text selection
+                  userSelect: 'none'
+                }}
+              >
+                <HorizontalRuleRounded 
+                  sx={{ 
+                    fontSize: 18,
+                    color: (isClicked)
+                      ? 'primary.main' 
+                      : isHovered 
+                        ? 'primary.light' 
+                        : 'action.active',
+                    opacity: isActive ? 1 : 0.4,
+                    transition: 'all 0.2s ease',
+                    filter: isHovered ? 'drop-shadow(0 0 4px rgba(25, 118, 210, 0.3))' : 'none',
+                  }} 
+                />
+                {isHovered && (
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      position: 'absolute',
+                      right: '100%',
+                      mr: 1,
+                      backgroundColor: 'primary.main',
+                      color: 'white',
+                      px: 1,
+                      py: 0.5,
+                      borderRadius: 1,
+                      fontSize: '0.65rem',
+                      whiteSpace: 'nowrap',
+                      animation: 'fadeIn 0.2s ease',
+                      '@keyframes fadeIn': {
+                        from: { opacity: 0, transform: 'translateX(10px)' },
+                        to: { opacity: 1, transform: 'translateX(0)' }
+                      }
+                    }}
+                  >
+                    Q{question.index}. {question.content}
+                  </Typography>
+                )}
+                {/* <Typography
+                  variant="caption"
+                  sx={{
+                    position: 'absolute',
+                    top: -4,
+                    right: -4,
+                    backgroundColor: 'primary.main',
+                    color: 'white',
+                    width: 16,
+                    height: 16,
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.55rem',
+                    fontWeight: 'bold',
+                    opacity: isHovered ? 1 : 0.8,
+                  }}
+                >
+                  {question.index}
+                </Typography> */}
+              </Box>
+            // </Tooltip>
+          );
+        })}
+      </Box>
+    );
+  };
+
+  // Render message panel for mobile
+  // const renderMessagePanel = () => {
+  //   if (!showMessagePanel || !activeMessage || !isMobile) return null;
+
+  //   return (
+  //     <Paper
+  //       sx={{
+  //         position: 'fixed',
+  //         bottom: 80,
+  //         right: 16,
+  //         left: 16,
+  //         p: 2,
+  //         zIndex: 1100,
+  //         bgcolor: 'background.paper',
+  //         boxShadow: 3,
+  //         borderRadius: 2,
+  //         maxHeight: '40vh',
+  //         overflow: 'auto',
+  //       }}
+  //     >
+  //       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+  //         <Typography variant="subtitle2" fontWeight="bold">
+  //           Question {activeMessage.index}
+  //         </Typography>
+  //         <IconButton size="small" onClick={() => setShowMessagePanel(false)}>
+  //           <CloseRounded fontSize="small" />
+  //         </IconButton>
+  //       </Box>
+  //       <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+  //         {formatTimeAgo(activeMessage.timestamp)}
+  //       </Typography>
+  //       <Typography variant="body2">
+  //         {activeMessage.fullContent}
+  //       </Typography>
+  //       <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+  //         <Button
+  //           size="small"
+  //           variant="outlined"
+  //           onClick={() => scrollToQuestion(activeMessage.messageId)}
+  //         >
+  //           Jump to Question
+  //         </Button>
+  //       </Box>
+  //     </Paper>
+  //   );
+  // };
+
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', mb: isMobile ? 16 : 12 }}>
+      {/* Message Dots */}
+      {renderMessageDots()}
+      {/* {renderMessagePanel()} */}
       {/* Header with Actions */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -703,6 +999,7 @@ const ChatInterface = ({ user, isMobile }) => {
 
       {/* Chat Messages */}
       <Paper 
+        ref={chatContainerRef}
         elevation={0} 
         sx={{ 
           flex: 1, 
@@ -715,7 +1012,21 @@ const ChatInterface = ({ user, isMobile }) => {
           // backgroundColor: 'grey.50',
           // border: '1px solid',
           // borderColor: 'grey.200'
-          borderRadius: 2
+          borderRadius: 2,
+          position: 'relative',
+          '&::-webkit-scrollbar': {
+            width: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'transparent',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: 'rgba(0, 0, 0, 0.2)',
+            borderRadius: '4px',
+          },
+          '&::-webkit-scrollbar-thumb:hover': {
+            background: 'rgba(0, 0, 0, 0.3)',
+          },
         }}
       >
         {messages.length === 0 ? (
@@ -755,9 +1066,21 @@ const ChatInterface = ({ user, isMobile }) => {
           </Box>
         ) : (
           <List>
-            {messages.map((message) => (
+            {messages.map((message) => {
+              const isUserQuestion = message.role === 'user';
+              const questionNumber = messageDots.find(q => q.messageId === message.id)?.index;
+              return (
               <React.Fragment key={message.id}>
-                <ListItem alignItems="flex-start" sx={{ px: 1}}>
+                <ListItem alignItems="flex-start" 
+                  sx={{ 
+                    px: 1,
+                    position: 'relative',
+                    '&:hover': {
+                      backgroundColor: isUserQuestion ? 'rgba(25, 118, 210, 0.02)' : 'transparent',
+                    }
+                  }}
+                  id={`message-${message.id}`}
+                >
                   {/* <ListItemAvatar>
                     <Avatar sx={{ 
                       bgcolor: message.role === 'user' ? 'primary.main' : 
@@ -809,6 +1132,26 @@ const ChatInterface = ({ user, isMobile }) => {
                               sx={{ fontSize: '0.7rem', height: '20px', ml: 'auto' }}
                             />
                           )}
+                        {isUserQuestion && (
+                          <Chip
+                            icon={<FiberManualRecord sx={{ fontSize: 10 }} />}
+                            label={`Q${questionNumber}`}
+                            size="small"
+                            variant="outlined"
+                            color="primary"
+                            onClick={() => scrollToQuestion(message.id)}
+                            sx={{
+                              fontSize: '0.65rem',
+                              height: 20,
+                              ml: 'auto',
+                              cursor: 'pointer',
+                              '&:hover': {
+                                backgroundColor: 'primary.light',
+                                color: 'white',
+                              }
+                            }}
+                          />
+                        )}
                       </Box>
                     }
                     secondaryTypographyProps={{ component: "div" }}
@@ -864,7 +1207,8 @@ const ChatInterface = ({ user, isMobile }) => {
                 </ListItem>
                 <Divider component="li" sx={{ my: 1 }} />   {/* variant="inset"  */}
               </React.Fragment>
-            ))}
+              );
+            })}
             {loading && (
               <ListItem alignItems="flex-start" sx={{ px: 1}}>
                 <ListItemAvatar>

@@ -1,5 +1,5 @@
 // src/components/FileUpload.js
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   Box,
   Paper,
@@ -50,6 +50,10 @@ const FileUpload = ({ onUploadSuccess, isMobile }) => {
   // const [uploadResults, setUploadResults] = useState([]);
   // const [dragActive, setDragActive] = useState(false);
   // const [showFileTypes, setShowFileTypes] = useState(false);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const onDrop = useCallback((acceptedFiles) => {
     if (!uploading && !files.some(f => f.status === 'success')) {
