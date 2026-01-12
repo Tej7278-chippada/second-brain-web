@@ -63,14 +63,16 @@ import {
 // });
 
 // Styled components
-const AnimatedToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
+const AnimatedToggleButtonGroup = styled(ToggleButtonGroup)(({ theme, isAtTop }) => ({
   position: 'relative',
   overflow: 'hidden',
   borderRadius: '24px',
-  padding: '4px',
-  background: theme.palette.mode === 'dark' 
-    ? 'rgba(255, 255, 255, 0.1)' 
-    : 'rgba(0, 0, 0, 0.05)',
+  padding: isAtTop ? '4px' : '3px',
+  background: isAtTop ? 'rgba(255, 255, 255, 0.1)'  : '#0f172a',
+  border: isAtTop ? 'none' : '1px solid rgba(255, 255, 255, 0.1)' ,
+  // background: theme.palette.mode === 'dark' 
+  //   ? 'rgba(255, 255, 255, 0.1)' 
+  //   : 'rgba(0, 0, 0, 0.05)',
   '& .MuiToggleButton-root': {
     position: 'relative',
     zIndex: 1,
@@ -119,6 +121,29 @@ function SecondBrainApp({ user, darkMode }) {
   // const [showSpeedDial, setShowSpeedDial] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [showMenubar, setShowMenubar] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [isAtTop, setIsAtTop] = useState(true);
+  
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const scrollDifference = Math.abs(currentScrollY - lastScrollY);
+
+      if (scrollDifference > 5) {
+        setIsAtTop(currentScrollY < 40); // detect top of page
+        if (currentScrollY < lastScrollY) {
+          setShowMenubar(true); // scrolling up
+        } else if (currentScrollY > lastScrollY + 15) { // Added buffer for downward scroll
+          setShowMenubar(false); // scrolling down
+        }
+        setLastScrollY(currentScrollY);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   useEffect(() => {
     checkSystemStatus();
@@ -294,9 +319,34 @@ function SecondBrainApp({ user, darkMode }) {
       </Box> */}
 
       {/* Type Selection Toggle with Slider Animation */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', position: 'relative', mb: 2 }}>
+      <Box
+        sx={{ // display: 'flex', justifyContent: 'center', position: 'relative', mb: 2 }}>
+          position: 'fixed',
+          top: isMobile ? 14 : 20,
+          left: 0,
+          right: 0,
+          zIndex: 100, 
+          transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease',
+          transform: showMenubar ? 'translateY(100%)' : 'translateY(-20%)',
+          opacity: showMenubar ? 1 : 0.8,
+          pointerEvents: showMenubar ? 'auto' : 'none',
+          display: 'flex',
+          justifyContent: 'center', // Center horizontally
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '1px',
+            background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0), transparent)',
+          }
+        }}
+        elevation={3}
+      >
         <AnimatedToggleButtonGroup
           value={activeTab}
+          isAtTop={isAtTop}
           exclusive
           // onChange={handleTypeChange}
           aria-label="post type selection"
