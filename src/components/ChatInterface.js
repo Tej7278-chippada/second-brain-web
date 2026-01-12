@@ -51,8 +51,8 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { prism, vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+// import ReactMarkdown from 'react-markdown';
+// import remarkGfm from 'remark-gfm';
 
 // Helper function to detect code blocks in text
 const detectCodeBlocks = (text) => {
@@ -512,22 +512,22 @@ const ChatInterface = ({ user, isMobile }) => {
           </code>
         );
       } else {
-        // Check if the text contains markdown that needs processing
-        const hasMarkdown = /[*_`[!]/.test(block.content);
+        // // Check if the text contains markdown that needs processing
+        // const hasMarkdown = /[*_`[!]/.test(block.content);
         
-        if (hasMarkdown) {
-          return (
-            <ReactMarkdown 
-              key={index}
-              remarkPlugins={[remarkGfm]}
-              components={{
-                p: ({node, ...props}) => <span style={{display: 'inline'}} {...props} />,
-              }}
-            >
-              {block.content.replace(/\n/g, ' ')}
-            </ReactMarkdown>
-          );
-        } else {
+        // if (hasMarkdown) {
+        //   return (
+        //     <ReactMarkdown 
+        //       key={index}
+        //       remarkPlugins={[remarkGfm]}
+        //       components={{
+        //         p: ({node, ...props}) => <span style={{display: 'inline'}} {...props} />,
+        //       }}
+        //     >
+        //       {block.content.replace(/\n/g, ' ')}
+        //     </ReactMarkdown>
+        //   );
+        // } else {
           // For plain text, just render it directly
           return (
             // <Typography
@@ -544,7 +544,7 @@ const ChatInterface = ({ user, isMobile }) => {
             </span>
             // </Typography>
           );
-        }
+        // }
       }
     });
   };
