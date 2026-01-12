@@ -512,21 +512,39 @@ const ChatInterface = ({ user, isMobile }) => {
           </code>
         );
       } else {
-        return (
-          // <Typography
-          //   key={index}
-          //   component="span"
-          //   sx={{
-          //     lineHeight: 1.6,
-          //     whiteSpace: 'pre-wrap',
-          //     wordBreak: 'break-word'
-          //   }}
-          // >
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {block.content}
+        // Check if the text contains markdown that needs processing
+        const hasMarkdown = /[*_`[!]/.test(block.content);
+        
+        if (hasMarkdown) {
+          return (
+            <ReactMarkdown 
+              key={index}
+              remarkPlugins={[remarkGfm]}
+              components={{
+                p: ({node, ...props}) => <span style={{display: 'inline'}} {...props} />,
+              }}
+            >
+              {block.content.replace(/\n/g, ' ')}
             </ReactMarkdown>
-          // </Typography>
-        );
+          );
+        } else {
+          // For plain text, just render it directly
+          return (
+            // <Typography
+            //   key={index}
+            //   component="span"
+            //   sx={{
+            //     lineHeight: 1.6,
+            //     whiteSpace: 'pre-wrap',
+            //     wordBreak: 'break-word'
+            //   }}
+            // >
+            <span key={index} style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+              {block.content}
+            </span>
+            // </Typography>
+          );
+        }
       }
     });
   };
