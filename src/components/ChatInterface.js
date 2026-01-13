@@ -696,37 +696,62 @@ const ChatInterface = ({ user, isMobile }) => {
           const isActive = activeMessage?.id === question.id;
           
           return (
-            // <Tooltip
-            //   key={question.id}
-            //   title={
-            //     <Box sx={{ p: 0.5, background: 'background.default' }}>
-            //       <Typography variant="caption" fontWeight="bold">
-            //         Question {question.index}
-            //       </Typography>
-            //       <Typography variant="caption" component="div" sx={{ mt: 0.5 }}>
-            //         {question.content}
-            //       </Typography>
-            //       <Typography variant="caption" color="text.secondary" component="div" sx={{ mt: 0.5 }}>
-            //         {formatTimeAgo(question.timestamp)}
-            //       </Typography>
-            //       <Typography variant="caption" color="primary" component="div" sx={{ mt: 0.5, fontStyle: 'italic' }}>
-            //         Click to jump to question
-            //       </Typography>
-            //     </Box>
-            //   }
-            //   placement="left"
-            //   arrow
-            //   PopperProps={{
-            //     modifiers: [
-            //       {
-            //         name: 'offset',
-            //         options: {
-            //           offset: [0, 10],
-            //         },
-            //       },
-            //     ],
-            //   }}
-            // >
+            <Tooltip
+              key={question.id}
+              title={`Q${question.index}. ${question.content}`}
+              // title={
+              //   <Box sx={{ p: 0.5, background: 'background.default' }}>
+              //     <Typography variant="caption" fontWeight="bold">
+              //       Question {question.index}
+              //     </Typography>
+              //     <Typography variant="caption" component="div" sx={{ mt: 0.5 }}>
+              //       Q{question.index}. {question.content}
+              //     </Typography>
+              //     <Typography variant="caption" color="text.secondary" component="div" sx={{ mt: 0.5 }}>
+              //       {formatTimeAgo(question.timestamp)}
+              //     </Typography>
+              //     <Typography variant="caption" color="primary" component="div" sx={{ mt: 0.5, fontStyle: 'italic' }}>
+              //       Click to jump to question
+              //     </Typography>
+              //   </Box>
+              // }
+              placement="left"
+              arrow
+              componentsProps={{
+                tooltip: {
+                  sx: {
+                    backgroundColor: 'background.default',
+                    color: 'text.primary',
+                    // border: '1px solid',
+                    // borderColor: 'divider',
+                    // transition: theme =>
+                    //   theme.transitions.create(['opacity', 'transform'], {
+                    //     duration: theme.transitions.duration.short,
+                    //   }),
+                    boxShadow: 3,
+                    borderRadius: 1,
+                    fontSize: '0.75rem',
+                    px: 1,
+                    py: 0.5,
+                  },
+                },
+                arrow: {
+                  sx: {
+                    color: 'background.default',
+                  },
+                },
+              }}
+              PopperProps={{
+                modifiers: [
+                  {
+                    name: 'offset',
+                    options: {
+                      offset: [0, 10],
+                    },
+                  },
+                ],
+              }}
+            >
               <Box
                 onClick={() => handleDotClick(question)}
                 onMouseEnter={() => handleDotHover(question)}
@@ -762,7 +787,7 @@ const ChatInterface = ({ user, isMobile }) => {
                     filter: isHovered ? 'drop-shadow(0 0 4px rgba(25, 118, 210, 0.3))' : 'none',
                   }} 
                 />
-                {isHovered && (
+                {/* {isHovered && (
                   <Typography
                     variant="caption"
                     sx={{
@@ -785,7 +810,7 @@ const ChatInterface = ({ user, isMobile }) => {
                   >
                     Q{question.index}. {question.content}
                   </Typography>
-                )}
+                )} */}
                 {/* <Typography
                   variant="caption"
                   sx={{
@@ -808,7 +833,7 @@ const ChatInterface = ({ user, isMobile }) => {
                   {question.index}
                 </Typography> */}
               </Box>
-            // </Tooltip>
+            </Tooltip>
           );
         })}
       </Box>
