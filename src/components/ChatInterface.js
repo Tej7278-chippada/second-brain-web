@@ -653,10 +653,30 @@ const ChatInterface = ({ user, isMobile }) => {
           alignItems: 'center',
           // backgroundColor: 'rgba(255, 255, 255, 0.9)',
           backdropFilter: 'blur(10px)',
-          borderRadius: '20px',
+          // borderRadius: '20px',
+          borderRadius: isMobile ? '14px 0 0 14px' : '20px',
           p: isMobile ? 0.5 : 0.5,
           border: '1px solid rgba(0, 0, 0, 0.1)',
           boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+          maxHeight: '20vh',
+          overflowY: 'auto',
+          '&::-webkit-scrollbar': {
+            width: '4px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'transparent',
+            margin: isMobile ? '0' : '12px 0',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: 'rgba(133, 133, 133, 0.2)',
+            borderRadius: '2px',
+            minHeight: '40px',
+            // border: '2px solid rgba(255, 255, 255, 0.95)',
+            backgroundClip: 'padding-box',
+            '&:hover': {
+              backgroundColor: 'rgba(100, 100, 100, 0.5)',
+            },
+          },
         }}
       >
         {/* <Typography 
