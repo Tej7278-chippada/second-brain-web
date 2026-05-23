@@ -12,6 +12,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import GoogleOAuth from './GoogleOAuth';
 import { authServices } from '../services/api';
+import AboutSecondBrain from './AboutSecondBrain';
 // import PsychologyIcon from '@mui/icons-material/Psychology';
 
 const Login = ({ onLogin, isMobile }) => {
@@ -70,6 +71,7 @@ const Login = ({ onLogin, isMobile }) => {
   }
 
   return (
+    <>
     <Container maxWidth="sm">
       <Box sx={{ 
         mt: { xs: 4, md: 8 },
@@ -98,7 +100,8 @@ const Login = ({ onLogin, isMobile }) => {
               Second Brain
             </Typography>
             <Typography variant="body1" color="text.secondary" align="center">
-              Your personal AI-powered knowledge assistant
+              AI-powered another copy of your brain
+              {/* Your personal AI-powered knowledge assistant */}
             </Typography>
           </Box>
           
@@ -154,6 +157,8 @@ const Login = ({ onLogin, isMobile }) => {
         </Box>
       </Box>
     </Container>
+    <AboutSecondBrain/>
+    </>
   );
 };
 
