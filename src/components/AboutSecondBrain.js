@@ -156,7 +156,7 @@ const AboutSecondBrain = () => {
   ];
 
   return (
-    <Box sx={{ bgcolor: 'background.default', pt: 0, pb: { xs: 3, sm: 3, md: 4 } }}>
+    <Box sx={{ bgcolor: 'background.default', pt: 2, pb: { xs: 3, sm: 3, md: 4 } }}>
       <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 2, md: 3 } }}>
         {/* Hero Section */}
         <Box sx={{ mb: { xs: 4, md: 6 }, textAlign: 'center' }}>

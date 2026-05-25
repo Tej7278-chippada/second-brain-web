@@ -13,6 +13,8 @@ import { useNavigate } from 'react-router-dom';
 import GoogleOAuth from './GoogleOAuth';
 import { authServices } from '../services/api';
 import AboutSecondBrain from './AboutSecondBrain';
+import TermsOfService from './TermsOfService';
+import PrivacyPolicy from './PrivacyPolicy';
 // import PsychologyIcon from '@mui/icons-material/Psychology';
 
 const Login = ({ onLogin, isMobile }) => {
@@ -20,6 +22,8 @@ const Login = ({ onLogin, isMobile }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [openTerms, setOpenTerms] = useState(false);
+  const [openPrivacy, setOpenPrivacy] = useState(false);
 
   const checkAuthStatus = useCallback( async () => {
     try {
@@ -139,11 +143,23 @@ const Login = ({ onLogin, isMobile }) => {
           <Box sx={{ mt: 4, pt: 3, borderTop: 1, borderColor: 'divider' }}>
             <Typography variant="body2" color="text.secondary" align="center">
               By signing in, you agree to our{' '}
-              <Typography component="span" variant="body2" color="primary" sx={{ cursor: 'pointer' }}>
+              <Typography 
+                component="span" 
+                variant="body2" 
+                color="primary" 
+                sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
+                onClick={() => setOpenTerms(true)}
+              >
                 Terms of Service
               </Typography>{' '}
               and{' '}
-              <Typography component="span" variant="body2" color="primary" sx={{ cursor: 'pointer' }}>
+              <Typography 
+                component="span" 
+                variant="body2" 
+                color="primary" 
+                sx={{ cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
+                onClick={() => setOpenPrivacy(true)}
+              >
                 Privacy Policy
               </Typography>
             </Typography>
@@ -158,6 +174,8 @@ const Login = ({ onLogin, isMobile }) => {
       </Box>
     </Container>
     <AboutSecondBrain/>
+    <TermsOfService open={openTerms} onClose={() => setOpenTerms(false)} />
+    <PrivacyPolicy open={openPrivacy} onClose={() => setOpenPrivacy(false)} />
     </>
   );
 };
